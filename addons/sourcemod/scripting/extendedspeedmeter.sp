@@ -381,7 +381,7 @@ public OnConfigsExecuted()
 }
 
 /**
-* A map started, reset all data and fetch the records to the database.
+* A map started, reset all data and fetch the records from the database.
 */
 public OnMapStart()
 {
@@ -606,7 +606,7 @@ public ConVarTopspeed_Change(Handle:cvar, const String:oldVal[], const String:ne
 			ConnectSQL();
 			
 			// Temporary declaration
-			decl String:steamid[MAX_STEAMAUTH_LENGTH];
+			decl String:steamId[MAX_STEAMAUTH_LENGTH];
 			
 			// Get the map records again
 			ClearArray(g_hRecordSteamId);
@@ -622,12 +622,12 @@ public ConVarTopspeed_Change(Handle:cvar, const String:oldVal[], const String:ne
 			for (new i=0; i<size; i++)
 			{
 				
-				// Get all the values
-				GetArrayString(g_hSessionSteamId, i, steamid, sizeof(steamid));
+				// Get all the client details
+				GetArrayString(g_hSessionSteamId, i, steamId, sizeof(steamId));
 				gamespeed = GetArrayCell(g_hSessionMaxSpeedGame, i);
 				
 				// Check if the client has a record in the new database
-				new recordInNewDatabaseId = FindStringInArray(g_hRecordSteamId, steamid);
+				new recordInNewDatabaseId = FindStringInArray(g_hRecordSteamId, steamId);
 				if (recordInNewDatabaseId != -1)
 				{
 					// The client has a record, remember it and check if the current one is higher
@@ -662,7 +662,7 @@ public ConVarChange_FloodTime(Handle:cvar, const String:oldVal[], const String:n
 }
 
 /**
-* Command to list all current session/game record speeds.
+* Command to list all current session/game speedrecords.
 */
 public Action:Command_TopSpeedCurrent(client, args)
 {
@@ -695,7 +695,7 @@ public Action:Command_TopSpeedCurrent(client, args)
 }
 
 /**
-* Command to list all time world record speeds.
+* Command to list all time world speedrecords.
 */
 public Action:Command_TopSpeedAllTime(client, args)
 {
@@ -728,7 +728,7 @@ public Action:Command_TopSpeedAllTime(client, args)
 }
 
 /**
-* Command to list the highest topspeed records ever.
+* Command to list the highest speedrecords ever.
 */
 public Action:Command_TopSpeedTop(client, args)
 {
@@ -761,7 +761,7 @@ public Action:Command_TopSpeedTop(client, args)
 }
 
 /**
-* Command to list the records of the current player.
+* Command to list the speedrecords of the current player.
 */
 public Action:Command_TopSpeedPersonal(client, args)
 {
@@ -827,7 +827,7 @@ public Action:Command_TopSpeedHelp(client, args)
 }
 
 /**
-* Admin command to list all current session/game speeds.
+* Admin command to list all current session/game speedrecords.
 */
 public Action:Command_ListTopSpeed(client, args)
 {
@@ -874,7 +874,7 @@ public Action:Command_ListTopSpeed(client, args)
 }
 
 /**
-* Admin command to manage all topspeeds & topspeed records.
+* Admin command to manage all current and past speedrecords.
 */
 public Action:Command_TopspeedAdmin(client, args)
 {
@@ -927,7 +927,7 @@ public OnRoundEnd(Handle:event, const String:name[], bool:broadcast)
 	}
 	else
 	{
-		// Possibly print highest records of current game/session
+		// Possibly print highest records of current round
 		if (g_bPlugin_ShowGameTopspeeds)
 		{
 			ShowBestRound();
@@ -953,7 +953,7 @@ public Action:Timer_Think(Handle:timer)
 		return Plugin_Handled;
 	}
 	
-	// If  a vote is in progress then remember it, it may not show the speedmeter
+	// If a vote is in progress then remember it, it may not show the speedmeter
 	new bool:voteInProgress = false;
 	if (IsVoteInProgress())
 	{
@@ -1220,7 +1220,7 @@ stock ShowSpeedMeter(player, bool:voteInProgress)
 		// Check if the client has a previous record
 		if (!GetArrayCell(g_hSessionNewRecord, clientIndex))
 		{
-			// The client has a previous record, check if it's a new topspeed record
+			// The client has a previous record, check if it's a new speedrecord
 			
 			// Find the current record
 			new recordIndex = FindStringInArray(g_hRecordSteamId, clientSteamId);
@@ -1231,18 +1231,18 @@ stock ShowSpeedMeter(player, bool:voteInProgress)
 			}
 			else
 			{
-				// Check if the current highest speed is faster then the previous
+				// Check if the current highest speedrecord is faster then the previous
 				if (GetArrayCell(g_hRecordMaxSpeed, recordIndex) < speed)
 				{
 					// New record! Mark that the client has a higher record
 					SetArrayCell(g_hSessionHigherRecord, clientIndex, true);
 					
-					// Possibly display a message of a highest topspeed record
+					// Possibly display a message of a highest speedrecord
 					if (g_bPlugin_ShowNewTopspeedMapMessage)
 					{
-						// Check if the client went faster then all records
+						// Check if the client went faster then all speedrecords
 						
-						// Get the highest record and compare it (and check them rounded to the unit to prevent duplicate messages)
+						// Get the highest speedrecord and compare it (and check them rounded to the unit to prevent duplicate messages)
 						if ((g_fHighestSpeedrecord * g_fUnitMess_Calc[g_iPlugin_Unit]) < (speed * g_fUnitMess_Calc[g_iPlugin_Unit]))
 						{
 							// New fastest world record! fetch the name and print it
@@ -1279,7 +1279,7 @@ stock ShowSpeedMeter(player, bool:voteInProgress)
 				// Check if the player is standing still
 				if (!g_bClientSetZero[player])
 				{
-					// Player just stopped moving, display 0.0 as current speed
+					// Player just stopped moving, display 0.0 as current speed once
 					PrintHintText(player, "%t\n%.1f %s", "Current speed", 0.0, g_szUnitMess_Name[g_iPlugin_Unit]);
 					
 					// Stop the hint sound if wanted
@@ -1293,7 +1293,7 @@ stock ShowSpeedMeter(player, bool:voteInProgress)
 						}
 					}
 					
-					// Remember that the speed is set to 0.0 for this player
+					// Remember that the speed is set to 0.0 for this player, so next time it won't keep on displaying 0.0 speed
 					g_bClientSetZero[player] = true;
 				}
 				return;
@@ -1325,7 +1325,7 @@ stock ShowSpeedMeter(player, bool:voteInProgress)
 }
 
 /**
-* Display the admin panel to manage topspeed records.
+* Display the admin panel to manage speedrecords.
 */
 stock ShowTopspeedAdmin(client)
 {
@@ -1356,7 +1356,7 @@ stock ShowTopspeedAdmin(client)
 }
 
 /**
-* Display the topspeed records of the current round.
+* Display the speedrecords of the current round.
 */
 stock ShowBestRound()
 {
@@ -1388,7 +1388,7 @@ stock ShowBestRound()
 		// Only show zero values if it is set to do so
 		if (topspeed > 0 || g_bPlugin_ShowZeroTopspeeds)
 		{
-			// Loop over all clients to print the topspeed record in their chat
+			// Loop over all clients to print the speedrecord in their chat
 			for (new client=1; client<=MaxClients; client++)
 			{
 				
@@ -1398,7 +1398,7 @@ stock ShowBestRound()
 					// Get the current client steam id that is being looped
 					GetClientAuthId(client, AuthId_Steam2, currentClientSteamId, sizeof(currentClientSteamId));
 					
-					// If the steam id of the topspeed record is the same as the current looped steam id, then print the record in red
+					// If the steam id of the speedrecord is the same as the current looped steam id, then print the record in red
 					if (StrEqual(clientSteamId, currentClientSteamId, false))
 					{
 						// Print the record of the client in the chat
@@ -1406,7 +1406,7 @@ stock ShowBestRound()
 					}
 					else if (i < g_iPlugin_AmountOfPrintedRecords)
 					{
-						// Print the top records in green in the chat
+						// Print the speedrecords in green in the chat for other clients
 						CPrintToChat(client, "{green}%d{red}. {green}%s (%.1f %s)", i + 1, clientName, topspeed, g_szUnitMess_Name[g_iPlugin_Unit]);
 					}
 				}
@@ -1416,12 +1416,12 @@ stock ShowBestRound()
 }
 
 /**
-* Display the topspeed records of the current game/session.
+* Display the speedrecords of the current game/session.
 */
 stock ShowBestCurrentSession()
 {
 	
-	// Sort all records according to their best topspeed in the current game/session
+	// Sort all records according to their best speedrecord in the current game/session
 	SortBestGame();
 	
 	// Get the amount of records
@@ -1448,7 +1448,7 @@ stock ShowBestCurrentSession()
 		// Only show zero values if it is set to do so
 		if (topspeed > 0 || g_bPlugin_ShowZeroTopspeeds)
 		{
-			// Loop over all clients to print the topspeed record in their chat
+			// Loop over all clients to print the speedrecord in their chat
 			for (new client=1; client<=MaxClients; client++)
 			{
 				
@@ -1458,7 +1458,7 @@ stock ShowBestCurrentSession()
 					// Get the current client steam id that is being looped
 					GetClientAuthId(client, AuthId_Steam2, currentClientSteamId, sizeof(currentClientSteamId));
 					
-					// If the steam id of the topspeed record is the same as the current looped steam id, then print the record in red
+					// If the steam id of the speedrecord is the same as the current looped steam id, then print the record in red
 					if (StrEqual(clientSteamId, currentClientSteamId, false))
 					{
 						// Print the record of the client in the chat
@@ -1466,7 +1466,7 @@ stock ShowBestCurrentSession()
 					}
 					else if (i < g_iPlugin_AmountOfPrintedRecords)
 					{
-						// Print the top records in green in the chat
+						// Print the speedrecords in green in the chat for other clients
 						CPrintToChat(client, "{green}%d{red}. {green}%s (%.1f %s)", i + 1, clientName, topspeed, g_szUnitMess_Name[g_iPlugin_Unit]);
 					}
 				}
@@ -1476,7 +1476,7 @@ stock ShowBestCurrentSession()
 }
 
 /**
-* Display the topspeed records of all time on this map, and show a menu to the current client to browse through all records.
+* Display the speedrecords of all time on this map, and show a menu to the current client to browse through all records.
 */
 stock ShowBestAllTime(clientCurrent, bool:printInChat = true)
 {
@@ -1520,7 +1520,7 @@ stock ShowBestAllTime(clientCurrent, bool:printInChat = true)
 		// Only show zero values if it is set to do so
 		if (topspeed > 0 || g_bPlugin_ShowZeroTopspeeds)
 		{
-			// Add the topspeed record to the menu if wanted
+			// Add the speedrecord to the menu if wanted
 			if (g_bPlugin_ShowTopspeedMapMenu)
 			{
 				// Only show to the given limit
@@ -1531,7 +1531,7 @@ stock ShowBestAllTime(clientCurrent, bool:printInChat = true)
 				}
 			}
 			
-			// Loop over all clients to print the topspeed record in their chat
+			// Loop over all clients to print the speedrecord in their chat
 			if (printInChat)
 			{
 				for (new client=1; client<=MaxClients; client++)
@@ -1543,7 +1543,7 @@ stock ShowBestAllTime(clientCurrent, bool:printInChat = true)
 						// Get the current client steam id that is being looped
 						GetClientAuthId(client, AuthId_Steam2, currentClientSteamId, sizeof(currentClientSteamId));
 						
-						// If the steam id of the topspeed record is the same as the current looped steam id, then print the record in red
+						// If the steam id of the speedrecord is the same as the current looped steam id, then print the record in red
 						if (StrEqual(clientSteamId, currentClientSteamId, false))
 						{
 							// Print the record of the client in the chat
@@ -1551,7 +1551,7 @@ stock ShowBestAllTime(clientCurrent, bool:printInChat = true)
 						}
 						else if (i < g_iPlugin_AmountOfPrintedRecords)
 						{
-							// Print the top records in green in the chat
+							// Print the speedrecords in green in the chat for other clients
 							CPrintToChat(client, "{green}%d{red}. {green}%s (%.1f %s)", i + 1, clientName, topspeed, g_szUnitMess_Name[g_iPlugin_Unit]);
 						}
 					}
@@ -1568,7 +1568,7 @@ stock ShowBestAllTime(clientCurrent, bool:printInChat = true)
 }
 
 /**
-* Display the highest topspeed records ever, and show a menu to the current client to browse through all records.
+* Display the highest speedrecords ever, and show a menu to the current client to browse through all records.
 */
 stock ShowHighestOverall(clientCurrent, bool:printInChat = true)
 {
@@ -1619,7 +1619,7 @@ stock ShowHighestOverall(clientCurrent, bool:printInChat = true)
 		// Only show zero values if it is set to do so
 		if (topspeed > 0 || g_bPlugin_ShowZeroTopspeeds)
 		{
-			// Add the topspeed record to the menu if wanted
+			// Add the speedrecord to the menu if wanted
 			if (g_bPlugin_ShowTopspeedMapMenu)
 			{
 				// Only show to the given limit
@@ -1630,7 +1630,7 @@ stock ShowHighestOverall(clientCurrent, bool:printInChat = true)
 				}
 			}
 			
-			// Loop over all clients to print the topspeed record in their chat
+			// Loop over all clients to print the speedrecords in their chat
 			if (printInChat)
 			{
 				for (new client=1; client<=MaxClients; client++)
@@ -1642,7 +1642,7 @@ stock ShowHighestOverall(clientCurrent, bool:printInChat = true)
 						// Get the current client steam id that is being looped
 						GetClientAuthId(client, AuthId_Steam2, currentClientSteamId, sizeof(currentClientSteamId));
 						
-						// If the steam id of the topspeed record is the same as the current looped steam id, then print the record in red
+						// If the steam id of the speedrecord is the same as the current looped steam id, then print the record in red
 						if (StrEqual(clientSteamId, currentClientSteamId, false))
 						{
 							// Print the record of the client in the chat
@@ -1650,7 +1650,7 @@ stock ShowHighestOverall(clientCurrent, bool:printInChat = true)
 						}
 						else if (i < g_iPlugin_AmountOfPrintedRecords)
 						{
-							// Print the top records in green in the chat
+							// Print the speedrecords in green in the chat for other clients
 							CPrintToChat(client, "{green}%d{red}. {green}%s (%.1f %s)", i + 1, clientName, topspeed, g_szUnitMess_Name[g_iPlugin_Unit]);
 						}
 					}
@@ -1918,7 +1918,7 @@ stock CombineAllMapRecords()
 }
 
 /**
-* Sort all topspeed records of the current round.
+* Sort all speedrecords of the current round.
 */
 stock SortBestRound()
 {
@@ -1949,7 +1949,7 @@ stock SortBestRound()
 }
 
 /**
-* Sort all topspeed records of the current game/session.
+* Sort all speedrecords of the current game/session.
 */
 stock SortBestGame()
 {
@@ -1980,7 +1980,7 @@ stock SortBestGame()
 }
 
 /**
-* Sort all topspeed records of the current map.
+* Sort all speedrecords of the current map.
 */
 stock SortAllMapRecords()
 {
@@ -2007,7 +2007,7 @@ stock SortAllMapRecords()
 }
 
 /**
-* Sort the best ever topspeed records.
+* Sort the best ever speedrecords.
 */
 stock SortHighestOverallRecords()
 {
@@ -2129,7 +2129,7 @@ stock InsertNewPlayer(client)
 		new id = FindStringInArray(g_hSessionSteamId, clientSteamId);
 		if (id == -1)
 		{
-			// New client, add the steam id, name to the dynamic arrays and itialise the speeds
+			// New client, add the steam id, name to the dynamic arrays and initialise the speeds
 			PushArrayString(g_hSessionSteamId, clientSteamId);
 			PushArrayString(g_hSessionName, clientName);
 			PushArrayCell(g_hSessionMaxSpeedRound, 0.0);
@@ -2426,7 +2426,7 @@ public TopspeedPersonalSubMenuCallBack(Handle:menuhandle, MenuAction:action, Cli
 	
 	if (action == MenuAction_Select)
 	{
-		// Select action found, the client clicked on a topspeed record
+		// Select action found, the client clicked on a speedrecord
 		// Get the map
 		decl String:choice[MAX_MAPNAME_LENGTH];
 		GetMenuItem(menuhandle, Position, choice, sizeof(choice));
@@ -2509,32 +2509,32 @@ public TopspeedAdminMenuCallBack(Handle:menuhandle, MenuAction:action, Client, P
 		// Select action found, the client clicked on an option
 		if (StrEqual(choice, "ResetCurrent"))
 		{
-			// Option: Reset a current topspeed
+			// Option: Reset a current speedrecord
 			ResetCurrent(Client);
 		}
 		else if (StrEqual(choice, "ResetAll"))
 		{
-			// Option: Reset all current topspeeds
+			// Option: Reset all current speedrecords
 			ResetAllCurrent(Client);
 		}
 		else if (StrEqual(choice, "DeleteRecord"))
 		{
-			// Option: Delete a topspeed record on the current map
+			// Option: Delete a speedrecord on the current map
 			DeleteRecord(Client);
 		}
 		else if (StrEqual(choice, "DeleteAll"))
 		{
-			// Option: Delete all topspeed records on the current map
+			// Option: Delete all speedrecords on the current map
 			DeleteAllRecords(Client);
 		}
 		else if (StrEqual(choice, "DeleteDifferent"))
 		{
-			// Option: Delete a topspeed record on a different map
+			// Option: Delete a speedrecord on a different map
 			DeleteDifferentRecord(Client);
 		}
 		else if (StrEqual(choice, "DeleteDifferentAll"))
 		{
-			// Option: Delete all topspeed records on a different map
+			// Option: Delete all speedrecords on a different map
 			DeleteAllDifferentRecord(Client);
 		}
 	}
@@ -3162,7 +3162,7 @@ public AdminMenu_DeleteRecord(Handle:topmenu, TopMenuAction:action, TopMenuObjec
 }
 
 /**
-* Delete a previous topspeed record on this map.
+* Delete a previous speedrecord on this map.
 */
 stock DeleteRecord(Client)
 {
@@ -3191,7 +3191,7 @@ stock DeleteRecord(Client)
 		GetArrayString(g_hRecordSteamId, i, clientSteamId, sizeof(clientSteamId));
 		topspeed = Float:GetArrayCell(g_hRecordMaxSpeed, i) * g_fUnitMess_Calc[g_iPlugin_Unit];
 		
-		// Add the topspeed record to the menu
+		// Add the speedrecord to the menu
 		Format(recordString, 50, "%s (%.1f %s)", clientName, topspeed, g_szUnitMess_Name[g_iPlugin_Unit]);
 		AddMenuItem(menuHandle, clientSteamId, recordString);
 	}
@@ -3229,7 +3229,7 @@ public AdminMenu_DeleteAllRecords(Handle:topmenu, TopMenuAction:action, TopMenuO
 }
 
 /**
-* Delete all previous topspeed records on this map.
+* Delete all previous speedrecords on this map.
 */
 stock DeleteAllRecords(Client)
 {	
@@ -3338,7 +3338,7 @@ public AdminMenu_DeleteAllDifferentRecords(Handle:topmenu, TopMenuAction:action,
 }
 
 /**
-* Delete a previous topspeed records on a different map.
+* Delete a previous speedrecords on a different map.
 */
 stock DeleteAllDifferentRecord(Client)
 {
@@ -3573,7 +3573,7 @@ stock GetMapRecords(String:map[])
 }
 
 /**
-* Get the highest overall topspeed records in the database.
+* Get the highest overall speedrecords in the database.
 */
 stock GetHighestOverallTopspeedRecords()
 {
@@ -3810,7 +3810,7 @@ stock SaveMapRecords()
 }
 
 /**
-* Delete a given topspeed record in the database, a steam id can only have records based on timestamps, it's the most accurate way besides deleting on IDs.
+* Delete a given speedrecord in the database, a steam id can only have records based on timestamps, it's the most accurate way besides deleting on IDs.
 */
 stock DeleteMapRecord(String:clientSteamId[], String:topspeedTimeStamp[])
 {
@@ -3845,7 +3845,7 @@ stock DeleteMapRecord(String:clientSteamId[], String:topspeedTimeStamp[])
 }
 
 /**
-* Delete all topspeed records of a given map in the database.
+* Delete all speedrecords of a given map in the database.
 */
 stock DeleteMapRecords(String:map[])
 {
@@ -3861,9 +3861,9 @@ stock DeleteMapRecords(String:map[])
 	new Handle:hQuery = SQL_Query(g_hSQL, sQuery);
 	
 	// Easy debug
-	// PrintToServer("############# DELETE RECORD #############");
+	// PrintToServer("############# DELETE RECORDS #############");
 	// PrintToServer("all map records %s", map);
-	// PrintToServer("############# ------------- #############");
+	// PrintToServer("############# -------------- #############");
 	
 	if (hQuery == INVALID_HANDLE)
 	{
