@@ -1,0 +1,171 @@
+﻿"Phrases"
+{
+	"Current speed"
+	{
+		"de"	"Derzeitige Geschwindigkeit"
+	}
+	"Speed meter"
+	{
+		"de"	"Speed meter"
+	}
+	"Current speedrecords on this round"
+	{
+		"de"	"Derzeitiger Geschwindigkeitsrekorde auf dieser {red}Runde"
+	}
+	"Current speedrecords on this map"
+	{
+		"de"	"Derzeitiger Geschwindigkeitsrekorde auf dieser {red}Map"
+	}
+	"Highest speedrecords on this map"
+	{
+		"de"	"Höchste Geschwindigkeitsrekorde auf dieser {red}Map"
+	}
+	"Highest speedrecords on this map (colorless)"
+	{
+		"de"	"Höchste Geschwindigkeitsrekorde auf dieser Map"
+	}
+	"Highest speedrecords on all maps"
+	{
+		"de"	"Höchste Geschwindigkeitsrekorde von {red}allen Maps"
+	}
+	"Highest speedrecords on all maps (colorless)"
+	{
+		"de"	"Höchste Geschwindigkeitsrekorde von allen Maps"
+	}
+	"Personal speedrecords"
+	{
+		"de"	"Persönliche Geschwindigkeitsrekorde"
+	}
+	"All speedrecords of"
+	{
+		"de"	"Alle Geschwindigkeitsrekorde von"
+	}
+	"No speedrecord found"
+	{
+		"de"	"Kein Geschwindigkeitsrekord gefunden"
+	}
+	"You are flooding the server, try again later"
+	{
+		"de"	"Du spammst den Server, versuch es später noch einmal"
+	}
+	"New fastest speedrecord"
+	{
+		"de"	"Neuer Geschwindigkeitsrekord"
+	}
+	"Speedrecord"
+	{
+		"de"	"Geschwindigkeitsrekord"
+	}
+	"Map"
+	{
+		"de"	"Map"
+	}
+	"Player"
+	{
+		"de"	"Spieler"
+	}
+	"Speed"
+	{
+		"de"	"Geschwindigkeit"
+	}
+	"Timestamp"
+	{
+		"de"	"Zeitstempel"
+	}
+	"Speed meter Commands"
+	{
+		"de"	"Speed meter Kommandos"
+	}
+	"Reset a current speedrecord"
+	{
+		"de"	"Eine derzeitige Geschwindigkeitsrekord zurücksetzen"
+	}
+	"Reset all current speedrecords"
+	{
+		"de"	"Alle derzeitigen Geschwindigkeitsrekorde zurücksetzen"
+	}
+	"Are you sure"
+	{
+		"de"	"Bist du sicher"
+	}
+	"Delete a saved speedrecord on the current map"
+	{
+		"de"	"Eine Geschwindigkeitsrekord von dieser Map löschen"
+	}
+	"Delete all saved speedrecords on the current map"
+	{
+		"de"	"Alle Geschwindigkeitsrekorde von dieser Map löschen"
+	}
+	"Delete a saved speedrecord on a different map"
+	{
+		"de"	"Eine Geschwindigkeitsrekorde von einer anderen Map löschen"
+	}
+	"Delete all saved speedrecords on a different map"
+	{
+		"de"	"Alle Geschwindigkeitsrekorde von einer anderen Map löschen"
+	}
+	"Delete all saved speedrecords on"
+	{
+		"de"	"Alle Geschwindigkeitsrekorde löschen von"
+	}
+	"Back"
+	{
+		"de"	"Zurück"
+	}
+	"Yes"
+	{
+		"de"	"Ja"
+	}
+	"No"
+	{
+		"de"	"Nein"
+	}
+	"For more info about Speed meter, type !topspeedhelp in chat"
+	{
+		"de"	"Für mehr Informationen über Speed meter Befehle, schreibe {green}!topspeedhelp {default}in den Chat"
+	}
+	"Speed meter help"
+	{
+		"de"	"Speed meter Hilfe"
+	}
+	"View all speedrecords of the current players on the current map"
+	{
+		"de"	"Zeige alle Geschwindigkeitsrekorde von den derzeitigen Spielern auf der derzeitigen Map"
+	}
+	"View the highest speedrecords of all players on the current map"
+	{
+		"de"	"Zeige die höchsten Geschwindigkeitsrekorde von allen Spielern auf der derzeitigen Map"
+	}
+	"View the highest speedrecords of all players on all maps"
+	{
+		"de"	"Zeige die Geschwindigkeitsrekorde von allen Spielern von allen Maps"
+	}
+	"View your highest speedrecords and rankings on all maps"
+	{
+		"de"	"Zeige deine Geschwindigkeitsrekorde von allen Maps"
+	}
+	"Check console for all current speedrecords"
+	{
+		"de"	"Auflistung aller derzeitige Geschwindigkeitsrekorde in der Konsole"
+	}
+	"Amount of records"
+	{
+		"de"	"Anzahl der Rekorde"
+	}
+	"Listing speedrecords"
+	{
+		"de"	"Liste der Geschwindigkeitsrekorde"
+	}
+	"SteamID"
+	{
+		"de"	"SteamID"
+	}
+	"Game Speed"
+	{
+		"de"	"Spielgeschwindigkeit"
+	}
+	"Round Speed"
+	{
+		"de"	"Rundengeschwindigkeit"
+	}
+}

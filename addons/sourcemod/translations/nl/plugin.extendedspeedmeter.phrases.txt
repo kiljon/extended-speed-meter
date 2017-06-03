@@ -1,0 +1,171 @@
+﻿"Phrases"
+{
+	"Current speed"
+	{
+		"nl"	"Huidige snelheid"
+	}
+	"Speed meter"
+	{
+		"nl"	"Speed meter"
+	}
+	"Current speedrecords on this round"
+	{
+		"nl"	"Huidige snelheidsrecords tijdens deze {red}ronde"
+	}
+	"Current speedrecords on this map"
+	{
+		"nl"	"Huidige snelheidsrecords op deze {red}map"
+	}
+	"Highest speedrecords on this map"
+	{
+		"nl"	"Hoogste snelheidsrecords op deze {red}map"
+	}
+	"Highest speedrecords on this map (colorless)"
+	{
+		"nl"	"Hoogste snelheidsrecords op deze map"
+	}
+	"Highest speedrecords on all maps"
+	{
+		"nl"	"Hoogste snelheidsrecords op {red}alle maps"
+	}
+	"Highest speedrecords on all maps (colorless)"
+	{
+		"nl"	"Hoogste snelheidsrecords op alle maps"
+	}
+	"Personal speedrecords"
+	{
+		"nl"	"Persoonlijke snelheidsrecords"
+	}
+	"All speedrecords of"
+	{
+		"nl"	"Alle snelheidsrecords van"
+	}
+	"No speedrecord found"
+	{
+		"nl"	"Geen snelheidsrecord gevonden"
+	}
+	"You are flooding the server, try again later"
+	{
+		"nl"	"Je bent de server aan het overbelasten, probeer later opnieuw"
+	}
+	"New fastest speedrecord"
+	{
+		"nl"	"Nieuwe snelste snelheidsrecord"
+	}
+	"Speedrecord"
+	{
+		"nl"	"Snelheidsrecord"
+	}
+	"Map"
+	{
+		"nl"	"Map"
+	}
+	"Player"
+	{
+		"nl"	"Speler"
+	}
+	"Speed"
+	{
+		"nl"	"Snelheid"
+	}
+	"Timestamp"
+	{
+		"nl"	"Tijdsaanduiding"
+	}
+	"Speed meter Commands"
+	{
+		"nl"	"Speed meter Commandos"
+	}
+	"Reset a current speedrecord"
+	{
+		"nl"	"Reset een huidig snelheidsrecord"
+	}
+	"Reset all current speedrecords"
+	{
+		"nl"	"Reset alle huidige snelheidsrecords"
+	}
+	"Are you sure"
+	{
+		"nl"	"Ben je zeker"
+	}
+	"Delete a saved speedrecord on the current map"
+	{
+		"nl"	"Verwijder een opgeslagen snelheidsrecord van de huidige map"
+	}
+	"Delete all saved speedrecords on the current map"
+	{
+		"nl"	"Verwijder alle opgeslagen snelheidsrecords van de huidige map"
+	}
+	"Delete a saved speedrecord on a different map"
+	{
+		"nl"	"Verwijder een opgeslagen snelheidsrecord van een andere map"
+	}
+	"Delete all saved speedrecords on a different map"
+	{
+		"nl"	"Verwijder alle opgeslagen snelheidsrecords van een andere map"
+	}
+	"Delete all saved speedrecords on"
+	{
+		"nl"	"Verwijder alle opgeslagen snelheidsrecords van"
+	}
+	"Back"
+	{
+		"nl"	"Terug"
+	}
+	"Yes"
+	{
+		"nl"	"Ja"
+	}
+	"No"
+	{
+		"nl"	"Neen"
+	}
+	"For more info about Speed meter, type !topspeedhelp in chat"
+	{
+		"nl"	"Voor meer informatie over Speed meter, type {green}!topspeedhelp {default}in chat"
+	}
+	"Speed meter help"
+	{
+		"nl"	"Speed meter hulp"
+	}
+	"View all speedrecords of the current players on the current map"
+	{
+		"nl"	"Bekijk alle snelheidsrecords van de huidige spelers op de huidige map"
+	}
+	"View the highest speedrecords of all players on the current map"
+	{
+		"nl"	"Bekijk alle hoogste snelheidsrecords van alle spelers op de huidige map"
+	}
+	"View the highest speedrecords of all players on all maps"
+	{
+		"nl"	"Bekijk de hoogste snelheidsrecords van alle spelers over alle maps heen"
+	}
+	"View your highest speedrecords and rankings on all maps"
+	{
+		"nl"	"Bekijk jouw snelheidsrecords en rankings van alle maps"
+	}
+	"Check console for all current speedrecords"
+	{
+		"nl"	"Controleer de console voor alle huidige snelheidsrecords"
+	}
+	"Amount of records"
+	{
+		"nl"	"Hoeveelheid records"
+	}
+	"Listing speedrecords"
+	{
+		"nl"	"Oplijsting alle snelheidsrecords"
+	}
+	"SteamID"
+	{
+		"nl"	"SteamID"
+	}
+	"Game Speed"
+	{
+		"nl"	"Spel snelheid"
+	}
+	"Round Speed"
+	{
+		"nl"	"Ronde snelheid"
+	}
+}

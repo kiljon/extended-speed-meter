@@ -1,0 +1,171 @@
+﻿"Phrases"
+{
+	"Current speed"
+	{
+		"da"	"Nuværende hastighed"
+	}
+	"Speed meter"
+	{
+		"da"	"Speed meter"
+	}
+	"Current speedrecords on this round"
+	{
+		"da"	"Nuværende tophastigheder på denne {red}runde"
+	}
+	"Current speedrecords on this map"
+	{
+		"da"	"Nuværende tophastigheder på denne {red}map"
+	}
+	"Highest speedrecords on this map"
+	{
+		"da"	"Tophastigheder på denne {red}map"
+	}
+	"Highest speedrecords on this map (colorless)"
+	{
+		"da"	"Tophastigheder på denne map"
+	}
+	"Highest speedrecords on all maps"
+	{
+		"da"	"Tophastigheder på {red}alle maps"
+	}
+	"Highest speedrecords on all maps (colorless)"
+	{
+		"da"	"Tophastigheder på alle maps"
+	}
+	"Personal speedrecords"
+	{
+		"da"	"Personlige tophastigheder"
+	}
+	"All speedrecords of"
+	{
+		"da"	"Alle tophastigheder af"
+	}
+	"No speedrecord found"
+	{
+		"da"	"Ingen tophastighed fundet"
+	}
+	"You are flooding the server, try again later"
+	{
+		"da"	"Du spammer serveren, prøv igen senere"
+	}
+	"New fastest speedrecord"
+	{
+		"da"	"Ny tophastighed"
+	}
+	"Speedrecord"
+	{
+		"da"	"Tophastighed"
+	}
+	"Map"
+	{
+		"da"	"Map"
+	}
+	"Player"
+	{
+		"da"	"Spiller"
+	}
+	"Speed"
+	{
+		"da"	"Fart"
+	}
+	"Timestamp"
+	{
+		"da"	"Tidsstempel"
+	}
+	"Speed meter Commands"
+	{
+		"da"	"Speed meter Kommandoer"
+	}
+	"Reset a current speedrecord"
+	{
+		"da"	"Nulstil en nuværende tophastighed"
+	}
+	"Reset all current speedrecords"
+	{
+		"da"	"Nulstil alle nuværende tophastigheder"
+	}
+	"Are you sure"
+	{
+		"da"	"Er du sikker"
+	}
+	"Delete a saved speedrecord on the current map"
+	{
+		"da"	"Slet en gemt tophastighed på den nuværende map"
+	}
+	"Delete all saved speedrecords on the current map"
+	{
+		"da"	"Slet alle gemte tophastigheder på den nuværende map"
+	}
+	"Delete a saved speedrecord on a different map"
+	{
+		"da"	"Slet en gemt tophastighed på en anden map"
+	}
+	"Delete all saved speedrecords on a different map"
+	{
+		"da"	"Slet alle gemte tophastigheder på en anden map"
+	}
+	"Delete all saved speedrecords on"
+	{
+		"da"	"Slet alle gemte tophastigheder på"
+	}
+	"Back"
+	{
+		"da"	"Tilbage"
+	}
+	"Yes"
+	{
+		"da"	"Ja"
+	}
+	"No"
+	{
+		"da"	"Nej"
+	}
+	"For more info about Speed meter, type !topspeedhelp in chat"
+	{
+		"da"	"For mere info om Speed meter type, skriv {green}!topspeedhelp {default}i chatten"
+	}
+	"Speed meter help"
+	{
+		"da"	"Speed meter hjælp"
+	}
+	"View all speedrecords of the current players on the current map"
+	{
+		"da"	"Se alle tophastigheder fra de tilgængelige spillere på den nuværende map"
+	}
+	"View the highest speedrecords of all players on the current map"
+	{
+		"da"	"Se de højeste tophastigheder fra alle spillere på den nuværende bane"
+	}
+	"View the highest speedrecords of all players on all maps"
+	{
+		"da"	"Se de højeste tophastigheder fra alle spillere fra alle maps"
+	}
+	"View your highest speedrecords and rankings on all maps"
+	{
+		"da"	"Se din højeste tophastighed og placering på alle maps"
+	}
+	"Check console for all current speedrecords"
+	{
+		"da"	"Tjek konsol for alle nuværende tophastigheder"
+	}
+	"Amount of records"
+	{
+		"da"	"Mængde af rekorder"
+	}
+	"Listing speedrecords"
+	{
+		"da"	"Viser tophastigheder"
+	}
+	"SteamID"
+	{
+		"da"	"SteamID"
+	}
+	"Game Speed"
+	{
+		"da"	"Spil fart"
+	}
+	"Round Speed"
+	{
+		"da"	"Runde fart"
+	}
+}
