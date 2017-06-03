@@ -4,6 +4,7 @@
 #define _smlib_strings_included
 
 #include <sourcemod>
+#include <smlib/math>
 
 /**
  * Checks if the string is numeric.
@@ -88,7 +89,7 @@ stock String_Trim(const String:str[], String:output[], size, const String:chrs[]
 stock String_RemoveList(String:buffer[], String:removeList[][], size, bool:caseSensitive=false)
 {	
 	for (new i=0; i < size; i++) {
-		ReplaceString(buffer, 2147483647, removeList[i], "", caseSensitive);
+		ReplaceString(buffer, SIZE_OF_INT, removeList[i], "", caseSensitive);
 	}
 }
 
@@ -107,15 +108,13 @@ stock String_ToLower(const String:input[], String:output[], size)
 	size--;
 
 	new x=0;
-	while (input[x] != '\0' || x < size) {
+	while (input[x] != '\0' && x < size) {
 		
-		if (IsCharUpper(input[x])) {
-			output[x] = CharToLower(input[x]);
-		}
+		output[x] = CharToLower(input[x]);
 		
 		x++;
 	}
-	
+
 	output[x] = '\0';
 }
 
@@ -134,44 +133,13 @@ stock String_ToUpper(const String:input[], String:output[], size)
 	size--;
 
 	new x=0;
-	while (input[x] != '\0') {
+	while (input[x] != '\0' && x < size) {
 		
-		if (IsCharLower(input[x])) {
-			output[x] = CharToUpper(input[x]);
-		}
+		output[x] = CharToUpper(input[x]);
 		
 		x++;
 	}
-	
-	output[x] = '\0';
-}
 
-/**
- * Strips all color control characters in a string.
- * The Output buffer can be the same as the input buffer.
- * Original code by Psychonic, thanks.
- *
- * @param input				Input String.
- * @param output			Output String.
- * @param size				Max Size of the Output string
- * @noreturn
- */
-stock String_StripChatColors(const String:input[], String:output[], size)
-{
-	new x = 0;
-	for (new i=0; input[i] != '\0'; i++) {
-	
-		if (x+1 == size) {
-			break;
-		}
-
-		new char = input[i];
-		
-		if (char > 0x08) {
-			output[x++] = char;
-		}
-	}
-	
 	output[x] = '\0';
 }
 
@@ -212,4 +180,54 @@ stock String_GetRandom(String:buffer[], size, length=32, const String:chrs[]="ab
 	}
 
 	buffer[length] = '\0';
+}
+
+/**
+ * Checks if string str starts with subString.
+ * 
+ *
+ * @param str				String to check
+ * @param subString			Sub-String to check in str
+ * @return					True if str starts with subString, false otherwise.
+ */
+stock bool:String_StartsWith(const String:str[], const String:subString[])
+{
+	new n = 0;
+	while (subString[n] != '\0') {
+
+		if (str[n] == '\0' || str[n] != subString[n]) {
+			return false;
+		}
+
+		n++;
+	}
+
+	return true;
+}
+
+/**
+ * Checks if string str ends with subString.
+ * 
+ *
+ * @param str				String to check
+ * @param subString			Sub-String to check in str
+ * @return					True if str ends with subString, false otherwise.
+ */
+stock bool:String_EndsWith(const String:str[], const String:subString[])
+{
+	new n_str = strlen(str) - 1;
+	new n_subString = strlen(subString) - 1;
+
+	if(n_str < n_subString) {
+		return false;
+	}
+
+	while (n_str != 0 && n_subString != 0) {
+
+		if (str[n_str--] != subString[n_subString--]) {
+			return false;
+		}
+	}
+
+	return true;
 }
