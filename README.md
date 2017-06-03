@@ -100,29 +100,27 @@ sm_extendedspeedmeter_unit "0"
 
 **Commands**
 
-!topspeed / !topspeeds - View all speedrecords of the current players on the current map
-!topspeedmap - View the highest speedrecords of all players on the current map
-!topspeedtop - View the highest speedrecords of all players on all maps
-!topspeedpr - View your highest speedrecords and rankings on all maps
-!topspeedhelp - View a menu containing the above information
+* !topspeed / !topspeeds - View all speedrecords of the current players on the current map
+* !topspeedmap - View the highest speedrecords of all players on the current map
+* !topspeedtop - View the highest speedrecords of all players on all maps
+* !topspeedpr - View your highest speedrecords and rankings on all maps
+* !topspeedhelp - View a menu containing the above information
 
 **Admin Commands**
-!listtopspeed - Dumps all current speedrecords information of the current players in the console
-!topspeedadmin - View the admin menu for this plugin
-!admin > Speed meter Commands - View the admin menu for this plugin
-
-!topspeedreset - View the menu to reset a speedrecord
-!topspeedresetall - Reset all current speedrecords
-!topspeeddelete - View the menu to delete a previous speedrecord on this map
-!topspeeddeleteall - Delete all previous speedrecords on this map
-!topspeeddeletedifferent - View the menu to delete a previous speedrecord on a different map
-!topspeeddeletedifferentall - View the menu to delete all previous speedrecords on a different map
+* !listtopspeed - Dumps all current speedrecords information of the current players in the console
+* !topspeedadmin - View the admin menu for this plugin
+* !admin > Speed meter Commands - View the admin menu for this plugin
+* !topspeedreset - View the menu to reset a speedrecord
+* !topspeedresetall - Reset all current speedrecords
+* !topspeeddelete - View the menu to delete a previous speedrecord on this map
+* !topspeeddeleteall - Delete all previous speedrecords on this map
+* !topspeeddeletedifferent - View the menu to delete a previous speedrecord on a different map
+* !topspeeddeletedifferentall - View the menu to delete all previous speedrecords on a different map
 
 # Installation instructions
 
 * Extract .zip in your mod folder.
 * The cfg file in cfg/sourcemod will automatically be created and adjusted for the current game.
-
 * Make sure the "default" database is set up in /addons/sourcemod/configs/databases.cfg (the database string can be changed in the cfg file)
 
 # Dependencies
