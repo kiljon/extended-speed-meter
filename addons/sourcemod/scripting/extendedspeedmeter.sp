@@ -36,7 +36,7 @@ P L U G I N   I N F O
 #define PLUGIN_TAG				"sm"
 #define PLUGIN_AUTHOR			"kiljon (based on Chanz's work)"
 #define PLUGIN_DESCRIPTION		"Shows current player speed in HUD, saves it and manages the highest."
-#define PLUGIN_VERSION 			"1.2"
+#define PLUGIN_VERSION 			"1.4"
 #define PLUGIN_URL				"https://forums.alliedmods.net/showthread.php?p=2336846"
 
 public Plugin:myinfo = {
@@ -74,6 +74,7 @@ G L O B A L   V A R S
 new Handle:g_cvarUnit = INVALID_HANDLE;
 new Handle:g_cvarFloodTime = INVALID_HANDLE;
 new Handle:g_cvarDisplayTick = INVALID_HANDLE;
+new Handle:g_cvarShowHUD = INVALID_HANDLE;
 new Handle:g_cvarShowSpeedToSpecs = INVALID_HANDLE;
 new Handle:g_cvarShowRoundTopspeeds = INVALID_HANDLE;
 new Handle:g_cvarShowGameTopspeeds = INVALID_HANDLE;
@@ -93,6 +94,7 @@ new Handle:g_cvarExtendedSpeedMeterVersion = INVALID_HANDLE;
 new g_iPlugin_Unit = 0;
 new Float:g_fPlugin_FloodTime = 0.0;
 new Float:g_fPlugin_DisplayTick = 0.0;
+new bool:g_bPlugin_ShowHUD = false;
 new bool:g_bPlugin_ShowSpeedToSpecs = false;
 new bool:g_bPlugin_ShowRoundTopspeeds = false;
 new bool:g_bPlugin_ShowGameTopspeeds = false;
@@ -135,7 +137,7 @@ new Handle:g_hAllMaxSpeedTimeStamp = INVALID_HANDLE;
 
 new Handle:g_hHighestOverallSteamId = INVALID_HANDLE;
 new Handle:g_hHighestOverallName = INVALID_HANDLE;
-new Handle:g_hHighestOverallMap = INVALID_HANDLE;
+new Handle:g_hHighestOverallMapName = INVALID_HANDLE;
 new Handle:g_hHighestOverallMaxSpeed = INVALID_HANDLE;
 new Handle:g_hHighestOverallMaxSpeedTimeStamp = INVALID_HANDLE;
 
@@ -214,6 +216,7 @@ public OnPluginStart()
 	// Get all ConVars
 	g_cvarUnit = CreateConVarEx("unit", "0", "Unit of measurement of speed (0=kilometers per hour, 1=miles per hour, 2=units per second, 3=meters per second)", FCVAR_NOTIFY | FCVAR_PLUGIN, true, 0.0, true, 3.0);
 	g_cvarDisplayTick = CreateConVarEx("tick", "0.2", "This sets how often the display is redrawn (this is the display tick rate).", FCVAR_NOTIFY | FCVAR_PLUGIN);
+	g_cvarShowHUD = CreateConVarEx("showhud", "1", "Display the speedmeter HUD?", FCVAR_NOTIFY | FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	g_cvarShowSpeedToSpecs = CreateConVarEx("showtospecs", "1", "Should spectators be able to see the speed of the one they are spectating?", FCVAR_NOTIFY | FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	g_cvarShowRoundTopspeeds = CreateConVarEx("showroundtopspeeds", "1", "Display the highest topspeeds of the current round at the end of the round?", FCVAR_NOTIFY | FCVAR_PLUGIN, true, 0.0, true, 1.0);
 	g_cvarShowGameTopspeeds = CreateConVarEx("showgametopspeeds", "1", "Display the highest topspeeds of the current game at the end of the game?", FCVAR_NOTIFY | FCVAR_PLUGIN, true, 0.0, true, 1.0);
@@ -242,6 +245,7 @@ public OnPluginStart()
 	// ConVar Runtime optimizer
 	g_iPlugin_Unit = GetConVarInt(g_cvarUnit);
 	g_fPlugin_DisplayTick = GetConVarFloat(g_cvarDisplayTick);
+	g_bPlugin_ShowHUD = bool:GetConVarInt(g_cvarShowHUD);
 	g_bPlugin_ShowSpeedToSpecs = bool:GetConVarInt(g_cvarShowSpeedToSpecs);
 	g_bPlugin_ShowRoundTopspeeds = bool:GetConVarInt(g_cvarShowRoundTopspeeds);
 	g_bPlugin_ShowGameTopspeeds = bool:GetConVarInt(g_cvarShowGameTopspeeds);
@@ -289,11 +293,12 @@ public OnPluginStart()
 	
 	g_hHighestOverallSteamId = CreateArray(MAX_STEAMAUTH_LENGTH);
 	g_hHighestOverallName = CreateArray(MAX_NAME_LENGTH);
-	g_hHighestOverallMap = CreateArray(MAX_MAPNAME_LENGTH);
+	g_hHighestOverallMapName = CreateArray(MAX_MAPNAME_LENGTH);
 	g_hHighestOverallMaxSpeed = CreateArray(4);
 	g_hHighestOverallMaxSpeedTimeStamp = CreateArray(20);
 	
 	g_hDifferentMapList = CreateArray(MAX_MAPNAME_LENGTH);
+	
 	g_hDifferentMapRecordSteamId = CreateArray(MAX_STEAMAUTH_LENGTH);
 	g_hDifferentMapRecordName = CreateArray(MAX_NAME_LENGTH);
 	g_hDifferentMapRecordMaxSpeed = CreateArray(4);
@@ -303,6 +308,7 @@ public OnPluginStart()
 	// Hook the ConVars
 	HookConVarChange(g_cvarUnit, ConVarTopspeed_Change);
 	HookConVarChange(g_cvarDisplayTick, ConVarTopspeed_Change);
+	HookConVarChange(g_cvarShowHUD, ConVarTopspeed_Change);
 	HookConVarChange(g_cvarShowSpeedToSpecs, ConVarTopspeed_Change);
 	HookConVarChange(g_cvarShowRoundTopspeeds, ConVarTopspeed_Change);
 	HookConVarChange(g_cvarShowGameTopspeeds, ConVarTopspeed_Change);
@@ -424,7 +430,7 @@ public OnMapStart()
 	
 	ClearArray(g_hHighestOverallSteamId);
 	ClearArray(g_hHighestOverallName);
-	ClearArray(g_hHighestOverallMap);
+	ClearArray(g_hHighestOverallMapName);
 	ClearArray(g_hHighestOverallMaxSpeed);
 	ClearArray(g_hHighestOverallMaxSpeedTimeStamp);
 	
@@ -533,6 +539,11 @@ public ConVarTopspeed_Change(Handle:cvar, const String:oldVal[], const String:ne
 			// Create a new timer with the given tick
 			g_hTimer_Think = CreateTimer(g_fPlugin_DisplayTick, Timer_Think, INVALID_HANDLE, TIMER_REPEAT);
 		}
+	}
+	else if (cvar == g_cvarShowHUD)
+	{
+		// Get the new value
+		g_bPlugin_ShowHUD = bool:StringToInt(newVal);
 	}
 	else if (cvar == g_cvarShowSpeedToSpecs)
 	{
@@ -1266,8 +1277,8 @@ stock ShowSpeedMeter(player, bool:voteInProgress)
 		SetArrayCell(g_hSessionMaxSpeedGame, clientIndex, speed);
 	}
 	
-	// Make sure not to display the speedmeter when a vote is in progress
-	if (!voteInProgress)
+	// Make sure not to display the speedmeter when a vote is in progress or when it is set not to show
+	if (!voteInProgress && g_bPlugin_ShowHUD)
 	{
 		// Display the current speed, first check for compatibility
 		if (!g_bIsHL2DM)
@@ -1481,7 +1492,7 @@ stock ShowBestCurrentSession()
 stock ShowBestAllTime(clientCurrent, bool:printInChat = true)
 {
 	
-	// Combine and sort all topspeed records ever according to their best topspeed on this map
+	// Combine and sort all speedrecords ever according to their highest speedrecord on this map
 	CombineAllMapRecords();
 	SortAllMapRecords();
 	
@@ -2028,7 +2039,7 @@ stock SortHighestOverallRecords()
 				SwapArrayItems(g_hHighestOverallName, i, j);
 				SwapArrayItems(g_hHighestOverallMaxSpeedTimeStamp, i, j);
 				SwapArrayItems(g_hHighestOverallMaxSpeed, i, j);
-				SwapArrayItems(g_hHighestOverallMap, i, j);
+				SwapArrayItems(g_hHighestOverallMapName, i, j);
 			} 
 		} 
 	}
@@ -2285,7 +2296,7 @@ public TopspeedTopMenuCallBack(Handle:menuhandle, MenuAction:action, Client, Pos
 		GetArrayString(g_hHighestOverallName, Position, clientName, sizeof(clientName));
 		GetArrayString(g_hHighestOverallSteamId, Position, clientSteamId, sizeof(clientSteamId));
 		GetArrayString(g_hHighestOverallMaxSpeedTimeStamp, Position, topspeedTimeStamp, sizeof(topspeedTimeStamp));
-		GetArrayString(g_hHighestOverallMap, Position, mapName, sizeof(mapName));
+		GetArrayString(g_hHighestOverallMapName, Position, mapName, sizeof(mapName));
 		topspeed = Float:GetArrayCell(g_hHighestOverallMaxSpeed, Position);
 		
 		// Create the submenu in which all details of the record are visible (\n is for an enter)
@@ -2768,7 +2779,7 @@ public TopspeedAdminMenuDeleteRecordAllCallBack(Handle:menuhandle, MenuAction:ac
 /**
 * Callback function for the topspeedadmin "Delete a saved speedrecord on a different map" submenu.
 */
-public TopspeedAdminMenuDeleteRecordDifferentMapCallBack(Handle:menuhandle, MenuAction:action, Client, Position)
+public TopspeedAdminMenuDeleteRecordDifferentMapCallBack(Handle:menuhandle, MenuAction:action, clientCurrent, Position)
 {
 	
 	if (action == MenuAction_Select)
@@ -2816,14 +2827,14 @@ public TopspeedAdminMenuDeleteRecordDifferentMapCallBack(Handle:menuhandle, Menu
 		
 		// Display the created menu
 		SetMenuExitBackButton(menuHandle, true);
-		DisplayMenu(menuHandle, Client, MENU_TIME_FOREVER);
+		DisplayMenu(menuHandle, clientCurrent, MENU_TIME_FOREVER);
 	}
 	else if (action == MenuAction_Cancel)
 	{
 		if (Position == MenuCancel_ExitBack)
 		{
 			// Back
-			ShowTopspeedAdmin(Client);
+			ShowTopspeedAdmin(clientCurrent);
 			return;
 		}
 	}
@@ -3279,7 +3290,7 @@ public AdminMenu_DeleteDifferentRecord(Handle:topmenu, TopMenuAction:action, Top
 }
 
 /**
-* Delete a previous topspeed records on a different map.
+* Delete a previous speedrecord on a different map.
 */
 stock DeleteDifferentRecord(Client)
 {
@@ -3589,7 +3600,7 @@ stock GetHighestOverallTopspeedRecords()
 	// Empty the arrays to keep all records in
 	ClearArray(g_hHighestOverallSteamId);
 	ClearArray(g_hHighestOverallName);
-	ClearArray(g_hHighestOverallMap);
+	ClearArray(g_hHighestOverallMapName);
 	ClearArray(g_hHighestOverallMaxSpeed);
 	ClearArray(g_hHighestOverallMaxSpeedTimeStamp);
 	
@@ -3630,7 +3641,7 @@ stock GetHighestOverallTopspeedRecords()
 				PushArrayString(g_hHighestOverallName, clientName);
 				PushArrayCell(g_hHighestOverallMaxSpeed, Float:SQL_FetchFloat(hQuery, 2));
 				PushArrayString(g_hHighestOverallMaxSpeedTimeStamp, topspeedTimeStamp);
-				PushArrayString(g_hHighestOverallMap, mapName);
+				PushArrayString(g_hHighestOverallMapName, mapName);
 			}
 		}
 	}
@@ -3703,7 +3714,7 @@ stock GetHighestOverallTopspeedRecords()
 		PushArrayString(g_hHighestOverallName, clientName);
 		PushArrayCell(g_hHighestOverallMaxSpeed, topspeed);
 		PushArrayString(g_hHighestOverallMaxSpeedTimeStamp, topspeedTimeStamp);
-		PushArrayString(g_hHighestOverallMap, g_sCurrentMap);
+		PushArrayString(g_hHighestOverallMapName, g_sCurrentMap);
 	}
 	
 	// Sort the dynamic arrays
@@ -3738,7 +3749,7 @@ stock SaveMapRecords()
 			GetArrayString(g_hSessionSteamId, i, clientSteamId, sizeof(clientSteamId));
 			ReplaceString(clientName, sizeof(clientName), "'", "", false);
 			
-			// Get the topspeed record and its timestamp
+			// Get the speedrecord and its timestamp
 			topspeed = Float:GetArrayCell(g_hSessionMaxSpeedGame, i);
 			GetArrayString(g_hSessionMaxSpeedGameTimeStamp, i, topspeedTimeStamp, sizeof(topspeedTimeStamp));
 			

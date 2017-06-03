@@ -10,11 +10,12 @@ This plugin can compile without errors or warnings in my environment. However it
 
 This plugin is a copy of the original [Advanced Speed Meter](https://forums.alliedmods.net/showthread.php?t=143765) with added functionality, more convars, cleaner code (imo), translations and more future-proof (removed the warnings that the original approved plugin displays). It's also active.
 
-I made this plugin because I wanted a server that I play on to keep track of my speedrecords. After finding out that the original plugin was inactive, I started exploring the great Sourcemod community. Since I'm a developper I could easily find out how everything worked and started building upon the original plugin. I worked about 6 days on this plugin, tested it and released it. After a week of having this plugin on the server that I play on, I fixed a few bugs and added a few features. I don't think there's more that can be added to this plugin so version 1.3 is a stable final version for now. Feel free to leave feedback and suggestions.
+I made this plugin because I wanted a server that I play on to keep track of my speedrecords. After finding out that the original plugin was inactive, I started exploring the great Sourcemod community. Since I'm a developper I could easily find out how everything worked and started building upon the original plugin. I worked about 6 days on this plugin, tested it and released it. After a week of having this plugin on the server that I play on, I fixed a few bugs and added a few features. Feel free to leave feedback and suggestions.
 
 # Feature list
 
 * Display current speed in HUD
+* Disable HUD
 * View all current speedrecords of the current players on the current map
 * View all speedrecords on the current map (with an optional menu to view details of the records)
 * View all speedrecords on all maps (with an optional menu to view details of the records)
@@ -39,17 +40,17 @@ sm_extendedspeedmeter_amountofprintedrecords "3"
 
 // This sets how many records should be shown in the topspeedmap menu (0: unlimited)
 // Default: "0"
-sm_extendedspeedmeter_amountofrecordsintopspe edmap "0"
+sm_extendedspeedmeter_amountofrecordsintopspeedmap "0"
 
 // This sets how many records should be shown in the topspeedtop menu
 // Default: "10"
-sm_extendedspeedmeter_amountofrecordsintopspe edtop "10"
+sm_extendedspeedmeter_amountofrecordsintopspeedtop "10"
 
 // This sets per how many seconds an info message for help should be printed in chat (0: disabled)
 // Default: "240"
-sm_extendedspeedmeter_amountofsecondsinfohelp printinterval "240"
+sm_extendedspeedmeter_amountofsecondsinfohelpprintinterval "240"
 
-// Check if the hint sound is precached? (enabling this will make this plugin try to stop the UI/hint.wav, a spamming sound that notifies a player that a hint is displayed) This plugin will enable this automatically for TF2 and CSS. If the game doesn't supp
+// Check if the hint sound is precached? (enabling this will make this plugin try to stop the UI/hint.wav, a spamming sound that notifies a player that a hint is displayed) This plugin will enable this automatically for TF2 and CSS. If the game doesn't support this, it will give the 'SV_StartSound: UI/hint.wav not precached (0)' error and then you set this cvar to 0. If the game does support it, it might still give issues, try sv_hudhint_sound 0 to stop the hint sounds or a similar console command.
 // Default: "0" Minimum: "0.000000" Maximum: "1.000000"
 sm_extendedspeedmeter_checksoundprecache "0"
 
@@ -65,9 +66,13 @@ sm_extendedspeedmeter_enable "1"
 // Default: "1" Minimum: "0.000000" Maximum: "1.000000"
 sm_extendedspeedmeter_showgametopspeeds "1"
 
+// Display the speedmeter HUD?
+// Default: "1" Minimum: "0.000000" Maximum: "1.000000"
+sm_extendedspeedmeter_showhud "1"
+
 // Display a message when the highest topspeed of the current map is beaten? (automatically disabled for new clients for spam reasons with new maps)
 // Default: "1" Minimum: "0.000000" Maximum: "1.000000"
-sm_extendedspeedmeter_shownewtopspeedmapmessa ge "1"
+sm_extendedspeedmeter_shownewtopspeedmapmessage "1"
 
 // Display the highest topspeeds of the current round at the end of the round?
 // Default: "1" Minimum: "0.000000" Maximum: "1.000000"
