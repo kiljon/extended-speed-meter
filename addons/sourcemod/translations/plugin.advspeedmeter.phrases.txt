@@ -1,0 +1,24 @@
+"Phrases"
+{
+	"Current speed"
+	{
+		"de"	"Derzeitige geschwindigkeit"
+		"en"	"Current speed"
+	}
+	"The fastest players on this map"
+	{
+		"de"	"Die schnellsten Spieler auf dieser {red}Map:"
+		"en"	"The fastest players on this {red}map:"
+	}
+	"The fastest players in this round"
+	{
+		"de"	"Die schnellsten Spieler in dieser {red}Runde:"
+		"en"	"The fastest players in this {red}round:"
+	}
+	"Flooding the server"
+	{
+		"en"	"You are flooding the server!"
+		"de"	"Du spammst den Server!"
+
+	}
+}
