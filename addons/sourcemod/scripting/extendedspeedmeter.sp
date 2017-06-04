@@ -3681,6 +3681,12 @@ public ConnectSQLCallback(Handle:owner, Handle:hndl, const String:error[], any:d
 	{
 		SQL_TQuery(g_hSQL, CreateSQLTableCallback, "CREATE TABLE IF NOT EXISTS `topspeed` (`id` INTEGER PRIMARY KEY, `map` varchar(32) NOT NULL, `auth` varchar(32) NOT NULL, `speed` float NOT NULL, `name` varchar(64) NOT NULL, `timestamp` varchar(20) NOT NULL);");
 	}
+	else
+	{
+		// Try MySQL as default
+		SQL_TQuery(g_hSQL, SetNamesCallback, "SET NAMES  'utf8'", _, DBPrio_High);
+		SQL_TQuery(g_hSQL, CreateSQLTableCallback, "CREATE TABLE IF NOT EXISTS `topspeed` (`id` int(11) NOT NULL AUTO_INCREMENT, `map` varchar(32) NOT NULL, `auth` varchar(32) NOT NULL, `speed` float NOT NULL, `name` varchar(64) NOT NULL, `timestamp` varchar(20) NOT NULL, PRIMARY KEY (`id`));");
+	}
 	
 	// Reset the counter
 	g_iReconnectCounter = 1;
