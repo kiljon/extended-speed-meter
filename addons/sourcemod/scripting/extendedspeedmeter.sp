@@ -1684,67 +1684,110 @@ stock ShowHighestOverall(clientCurrent, bool:printInChat = true)
 stock ShowPersonal(clientCurrent)
 {
 	
-	// Temporary declarations
-	decl String:recordString[50];
-	decl String:clientSteamId[MAX_STEAMAUTH_LENGTH];
-	decl String:currentMapRecordSteamId[MAX_STEAMAUTH_LENGTH];
-	decl String:mapName[MAX_MAPNAME_LENGTH];
-	decl Float:topspeed;
-	decl Float:currentMapTopspeed;
-	new rank = 0;
-	new totalAmount = 0;
-	new currentMapRank = -1;
-	new currentMapTotalAmount = 0;
-	new currentMapAmountZero = 0;
-	new mapIndex = -1;
-	decl String:sQuery[448], String:sError[255];
+	// First get the different map list
 	
-	// Create and display a loading menu
-	new Handle:menuHandle = CreateMenu(TopspeedPersonalMenuCallBack);
-	SetMenuTitle(menuHandle, " - %t - \n", "Personal speedrecords");
+	// Temporary declaration
+	decl String:sQuery[448];
 	
-	// Get the client his steamid
-	GetClientAuthId(clientCurrent, AuthId_Steam2, clientSteamId, sizeof(clientSteamId));
+	// Create the SQL get query to retreive all maps
+	FormatEx(sQuery, sizeof(sQuery), "SELECT DISTINCT map FROM topspeed WHERE map != '%s' ORDER BY map", g_sCurrentMap);
 	
-	// Add the rank of the current map
-	
-	// Combine and sort all topspeed records ever according to their best topspeed on this map
-	CombineAllMapRecords();
-	SortAllMapRecords();
-	
-	// Get the amount of records
-	currentMapTotalAmount = GetArraySize(g_hAllName);
-	
-	// Loop partially over all records of the current map
-	for (new i=0; i<currentMapTotalAmount; i++)
+	// Activate the query
+	SQL_TQuery(g_hSQL, ShowPersonalDifferentMapListCallback, sQuery, clientCurrent);
+}
+
+
+/**
+* Callback function for the personal records map list.
+*/
+public ShowPersonalDifferentMapListCallback(Handle:owner, Handle:hQueryDifferentMapList, const String:sError[], any:clientCurrent)
+{
+	if (hQueryDifferentMapList == INVALID_HANDLE)
 	{
+		// Something went wrong, log the error
+		LogError("%s: SQL error on getting personal records maplist: %s", PLUGIN_NAME, sError);
+		return;
+	}
+	else
+	{
+		// Temporary declarations
+		decl String:mapName[MAX_MAPNAME_LENGTH];
+		decl String:sQuery[448];
+		decl String:clientSteamId[MAX_STEAMAUTH_LENGTH];
 		
-		// Get the topspeed
-		topspeed = Float:GetArrayCell(g_hAllMaxSpeed, i);
+		// Reset the maplist
+		ClearArray(g_hDifferentMapList);
 		
-		// Only show zero values if it is set to do so
-		if (topspeed > 0 || g_bPlugin_ShowZeroTopspeeds)
+		// Get the records if there are any
+		if (SQL_GetRowCount(hQueryDifferentMapList) > 0)
 		{
-			// Get the current record its steam id
-			GetArrayString(g_hAllSteamId, i, currentMapRecordSteamId, sizeof(currentMapRecordSteamId));
-			
-			// Check if the steam id is the same
-			if (StrEqual(clientSteamId, currentMapRecordSteamId, false))
+			// Fetch Data per Row
+			while (SQL_FetchRow(hQueryDifferentMapList))
 			{
-				// The same steam id, this is the client its record, save the rank
-				currentMapRank = i + 1;
-				break;
+				// Fetch the values
+				SQL_FetchString(hQueryDifferentMapList, 0, mapName, sizeof(mapName));
+				
+				// Save it locally
+				PushArrayString(g_hDifferentMapList, mapName);
 			}
 		}
-		else
-		{
-			currentMapAmountZero++;
-		}
+		
+		// Get the client his steamid
+		GetClientAuthId(clientCurrent, AuthId_Steam2, clientSteamId, sizeof(clientSteamId));
+		
+		// Create the SQL get query to retreive all records of the player without the current map
+		FormatEx(sQuery, sizeof(sQuery), "SELECT DISTINCT a.map, (SELECT COUNT(b.speed) FROM topspeed AS b WHERE b.map = a.map AND b.speed >= personal.speed) AS rank, COUNT(a.speed) AS total, personal.speed FROM topspeed AS a JOIN topspeed AS personal ON a.map = personal.map WHERE a.map != '%s' AND personal.auth = '%s' GROUP BY a.map ORDER BY a.map;", g_sCurrentMap, clientSteamId);
+		
+		// Activate the query
+		SQL_TQuery(g_hSQL, ShowPersonalMainCallback, sQuery, clientCurrent);
 	}
-	
-	// Loop over all records of the current map to find zero values
-	if (!g_bPlugin_ShowZeroTopspeeds)
+}
+
+
+/**
+* Callback function for the personal map records.
+*/
+public ShowPersonalMainCallback(Handle:owner, Handle:hQuery, const String:sError[], any:clientCurrent)
+{
+	if (hQuery == INVALID_HANDLE)
 	{
+		// Something went wrong, log the error
+		LogError("%s: SQL error on getting personal records: %s", PLUGIN_NAME, sError);
+		return;
+	}
+	else
+	{
+		// Temporary declarations
+		decl String:recordString[50];
+		decl String:clientSteamId[MAX_STEAMAUTH_LENGTH];
+		decl String:currentMapRecordSteamId[MAX_STEAMAUTH_LENGTH];
+		decl String:mapName[MAX_MAPNAME_LENGTH];
+		decl Float:topspeed;
+		decl Float:currentMapTopspeed;
+		new rank = 0;
+		new totalAmount = 0;
+		new currentMapRank = -1;
+		new currentMapTotalAmount = 0;
+		new currentMapAmountZero = 0;
+		new mapIndex = -1;
+		
+		// Create and display a loading menu
+		new Handle:menuHandle = CreateMenu(TopspeedPersonalMenuCallBack);
+		SetMenuTitle(menuHandle, " - %t - \n", "Personal speedrecords");
+		
+		// Get the client his steamid
+		GetClientAuthId(clientCurrent, AuthId_Steam2, clientSteamId, sizeof(clientSteamId));
+		
+		// Add the rank of the current map
+		
+		// Combine and sort all speedrecords ever according to their best speedrecord on this map
+		CombineAllMapRecords();
+		SortAllMapRecords();
+		
+		// Get the amount of records
+		currentMapTotalAmount = GetArraySize(g_hAllName);
+		
+		// Loop partially over all records of the current map
 		for (new i=0; i<currentMapTotalAmount; i++)
 		{
 			
@@ -1752,99 +1795,106 @@ stock ShowPersonal(clientCurrent)
 			topspeed = Float:GetArrayCell(g_hAllMaxSpeed, i);
 			
 			// Only show zero values if it is set to do so
-			if (topspeed <= 0)
+			if (topspeed > 0 || g_bPlugin_ShowZeroTopspeeds)
 			{
-				// One more zero
+				// Get the current record its steam id
+				GetArrayString(g_hAllSteamId, i, currentMapRecordSteamId, sizeof(currentMapRecordSteamId));
+				
+				// Check if the steam id is the same
+				if (StrEqual(clientSteamId, currentMapRecordSteamId, false))
+				{
+					// The same steam id, this is the client its record, save the rank
+					currentMapRank = i + 1;
+					break;
+				}
+			}
+			else
+			{
 				currentMapAmountZero++;
 			}
 		}
-	}
-	
-	// Verify a record was found
-	if (currentMapRank > - 1)
-	{
-		// Get the current topspeed
-		currentMapTopspeed = Float:GetArrayCell(g_hAllMaxSpeed, currentMapRank - 1);
 		
-		// Add the rank to the menu
-		Format(recordString, 50, "%s: #%d/%d (%.1f %s)", g_sCurrentMap, currentMapRank, currentMapTotalAmount - currentMapAmountZero, currentMapTopspeed * g_fUnitMess_Calc[g_iPlugin_Unit], g_szUnitMess_Name[g_iPlugin_Unit]);
-		AddMenuItem(menuHandle, g_sCurrentMap, recordString);
-	}
-	else
-	{
-		// Add an empty rank to the menu
-		Format(recordString, 50, "%s: %t", g_sCurrentMap, "No speedrecord found");
-		AddMenuItem(menuHandle, g_sCurrentMap, recordString);
-	}
-	
-	// Get a list of all different maps
-	GetDifferentMapList();
-	new Handle:mapsWithoutRecord = g_hDifferentMapList;
-	
-	// Add the ranks of different maps
-	
-	// Create the SQL get query to retreive all records of the player without the current map
-	FormatEx(sQuery, sizeof(sQuery), " SELECT DISTINCT a.map, (SELECT COUNT(b.speed) FROM topspeed AS b WHERE b.map = a.map AND b.speed >= personal.speed) AS rank, COUNT(a.speed) AS total, personal.speed FROM topspeed AS a JOIN topspeed AS personal ON a.map = personal.map WHERE a.map != '%s' AND personal.auth = '%s' GROUP BY a.map ORDER BY a.map;", g_sCurrentMap, clientSteamId);
-	
-	// Lock the database for usage and create a handle to activate the query
-	SQL_LockDatabase(g_hSQL);
-	new Handle:hQuery = SQL_Query(g_hSQL, sQuery);
-	
-	if (hQuery == INVALID_HANDLE)
-	{
-		// Something went wrong, log the error and unlock the database
-		SQL_GetError(g_hSQL, sError, sizeof(sError));
-		LogError("%s: SQL error on getting personal records: %s", PLUGIN_NAME, sError);
-		SQL_UnlockDatabase(g_hSQL);
-		return;
-	}
-	
-	// Get the records if there are any
-	if (SQL_GetRowCount(hQuery) > 0)
-	{
-		// Fetch Data per Row
-		while (SQL_FetchRow(hQuery))
+		// Loop over all records of the current map to find zero values
+		if (!g_bPlugin_ShowZeroTopspeeds)
 		{
-			// Fetch the values
-			SQL_FetchString(hQuery, 0, mapName, sizeof(mapName));
-			rank = SQL_FetchInt(hQuery, 1);
-			totalAmount = SQL_FetchInt(hQuery, 2);
-			topspeed = Float:SQL_FetchFloat(hQuery, 3);
-			
-			// Add the rank straight to the menu
-			Format(recordString, 50, "%s: #%d/%d (%.1f %s)", mapName, rank, totalAmount, topspeed * g_fUnitMess_Calc[g_iPlugin_Unit], g_szUnitMess_Name[g_iPlugin_Unit]);
-			AddMenuItem(menuHandle, mapName, recordString);
-			
-			// Delete the map from the maps without a record
-			mapIndex = FindStringInArray(mapsWithoutRecord, mapName);
-			RemoveFromArray(mapsWithoutRecord, mapIndex);
+			for (new i=0; i<currentMapTotalAmount; i++)
+			{
+				
+				// Get the topspeed
+				topspeed = Float:GetArrayCell(g_hAllMaxSpeed, i);
+				
+				// Only show zero values if it is set to do so
+				if (topspeed <= 0)
+				{
+					// One more zero
+					currentMapAmountZero++;
+				}
+			}
 		}
-	}
-	
-	// Unlock the database for usage and close the handle
-	SQL_UnlockDatabase(g_hSQL); 
-	CloseHandle(hQuery);
-	
-	// Add all remaining maps without a record
-	
-	// Get the amount
-	new mapsWithoutRecordSize = GetArraySize(mapsWithoutRecord);
-	
-	// Loop over all the maps without a record
-	// Loop all current records
-	for (new i=0; i<mapsWithoutRecordSize; i++)
-	{
 		
-		// Get the map
-		GetArrayString(mapsWithoutRecord, i, mapName, sizeof(mapName));
+		// Verify a record was found
+		if (currentMapRank > - 1)
+		{
+			// Get the current topspeed
+			currentMapTopspeed = Float:GetArrayCell(g_hAllMaxSpeed, currentMapRank - 1);
+			
+			// Add the rank to the menu
+			Format(recordString, 50, "%s: #%d/%d (%.1f %s)", g_sCurrentMap, currentMapRank, currentMapTotalAmount - currentMapAmountZero, currentMapTopspeed * g_fUnitMess_Calc[g_iPlugin_Unit], g_szUnitMess_Name[g_iPlugin_Unit]);
+			AddMenuItem(menuHandle, g_sCurrentMap, recordString);
+		}
+		else
+		{
+			// Add an empty rank to the menu
+			Format(recordString, 50, "%s: %t", g_sCurrentMap, "No speedrecord found");
+			AddMenuItem(menuHandle, g_sCurrentMap, recordString);
+		}
 		
-		// Add the map to the menu
-		Format(recordString, 50, "%s: %t", mapName, "No speedrecord found");
-		AddMenuItem(menuHandle, mapName, recordString);
+		// Get a list of all different maps
+		new Handle:mapsWithoutRecord = g_hDifferentMapList;
+		
+		// Get the records if there are any
+		if (SQL_GetRowCount(hQuery) > 0)
+		{
+			// Fetch Data per Row
+			while (SQL_FetchRow(hQuery))
+			{
+				// Fetch the values
+				SQL_FetchString(hQuery, 0, mapName, sizeof(mapName));
+				rank = SQL_FetchInt(hQuery, 1);
+				totalAmount = SQL_FetchInt(hQuery, 2);
+				topspeed = Float:SQL_FetchFloat(hQuery, 3);
+				
+				// Add the rank straight to the menu
+				Format(recordString, 50, "%s: #%d/%d (%.1f %s)", mapName, rank, totalAmount, topspeed * g_fUnitMess_Calc[g_iPlugin_Unit], g_szUnitMess_Name[g_iPlugin_Unit]);
+				AddMenuItem(menuHandle, mapName, recordString);
+				
+				// Delete the map from the maps without a record
+				mapIndex = FindStringInArray(mapsWithoutRecord, mapName);
+				RemoveFromArray(mapsWithoutRecord, mapIndex);
+			}
+		}
+		
+		// Add all remaining maps without a record
+		
+		// Get the amount
+		new mapsWithoutRecordSize = GetArraySize(mapsWithoutRecord);
+		
+		// Loop over all the maps without a record
+		// Loop all current records
+		for (new i=0; i<mapsWithoutRecordSize; i++)
+		{
+			
+			// Get the map
+			GetArrayString(mapsWithoutRecord, i, mapName, sizeof(mapName));
+			
+			// Add the map to the menu
+			Format(recordString, 50, "%s: %t", mapName, "No speedrecord found");
+			AddMenuItem(menuHandle, mapName, recordString);
+		}
+		
+		// Display the menu to the client
+		DisplayMenu(menuHandle, clientCurrent, MENU_TIME_FOREVER);
 	}
-	
-	// Display the menu to the client
-	DisplayMenu(menuHandle, clientCurrent, MENU_TIME_FOREVER);
 }
 
 /**
