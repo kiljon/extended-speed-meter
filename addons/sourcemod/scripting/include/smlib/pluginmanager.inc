@@ -97,13 +97,13 @@ stock SMLib_OnPluginStart(const String:name[],const String:tag[], const String:v
 	decl String:cvarVersionInfo[MAX_VERSION_INFO_LENGTH];
 	Format(cvarVersionInfo,sizeof(cvarVersionInfo),"\n  || %s ('%s') v%s\n  || Builddate:'%s - %s'\n  || Author(s):'%s'\n  || URL:'%s'\n  || Description:'%s'\n",g_sPlugin_Name,g_sPlugin_File_Name,version,__TIME__,__DATE__,author,url,description);
 	//needed if plugin has some late load:
-	g_cvarVersion = CreateConVarEx("version", version, cvarVersionInfo, FCVAR_PLUGIN|FCVAR_DONTRECORD|FCVAR_NOTIFY);
+	g_cvarVersion = CreateConVarEx("version", version, cvarVersionInfo, FCVAR_DONTRECORD|FCVAR_NOTIFY);
 	SetConVarString(g_cvarVersion,version);
 	
 	//Cvars
-	g_cvarEnable = CreateConVarEx("enable", "1", "Enables or Disables <pluginname> (1=Enable|0=Disable)",FCVAR_PLUGIN|FCVAR_NOTIFY,true,0.0);
-	g_cvarDebug = CreateConVarEx("debug", "0", "Enables or Disables debug mode of <pluginname> (3=ignore who is dev|2=SendToClient|1=Enable|0=Disabled)",FCVAR_PLUGIN|FCVAR_DONTRECORD,true,0.0,true,3.0);
-	g_cvarDeveloper_Flag = CreateConVarEx("developerflag", "z", "what admin flag is required to be an developer for <pluginname>",FCVAR_PLUGIN|FCVAR_DONTRECORD);
+	g_cvarEnable = CreateConVarEx("enable", "1", "Enables or Disables <pluginname> (1=Enable|0=Disable)",FCVAR_NOTIFY,true,0.0);
+	g_cvarDebug = CreateConVarEx("debug", "0", "Enables or Disables debug mode of <pluginname> (3=ignore who is dev|2=SendToClient|1=Enable|0=Disabled)",FCVAR_DONTRECORD,true,0.0,true,3.0);
+	g_cvarDeveloper_Flag = CreateConVarEx("developerflag", "z", "what admin flag is required to be an developer for <pluginname>",FCVAR_DONTRECORD);
 	
 	//Cvar Runtime optimizer
 	g_iPlugin_Enable = GetConVarInt(g_cvarEnable);

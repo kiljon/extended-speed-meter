@@ -214,22 +214,22 @@ public OnPluginStart()
 	GetGameFolderName(gamedir, sizeof(gamedir));
 	
 	// Get all ConVars
-	g_cvarUnit = CreateConVarEx("unit", "0", "Unit of measurement of speed (0=kilometers per hour, 1=miles per hour, 2=units per second, 3=meters per second)", FCVAR_NOTIFY | FCVAR_PLUGIN, true, 0.0, true, 3.0);
-	g_cvarDisplayTick = CreateConVarEx("tick", "0.2", "This sets how often the display is redrawn (this is the display tick rate).", FCVAR_NOTIFY | FCVAR_PLUGIN);
-	g_cvarShowHUD = CreateConVarEx("showhud", "1", "Display the speedmeter HUD?", FCVAR_NOTIFY | FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	g_cvarShowSpeedToSpecs = CreateConVarEx("showtospecs", "1", "Should spectators be able to see the speed of the one they are spectating?", FCVAR_NOTIFY | FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	g_cvarShowRoundTopspeeds = CreateConVarEx("showroundtopspeeds", "1", "Display the highest topspeeds of the current round at the end of the round?", FCVAR_NOTIFY | FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	g_cvarShowGameTopspeeds = CreateConVarEx("showgametopspeeds", "1", "Display the highest topspeeds of the current game at the end of the game?", FCVAR_NOTIFY | FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	g_cvarShowTopspeedMapMenu = CreateConVarEx("showtopspeedmapmenu", "1", "Display a menu to view all the highest topspeeds of the current map?", FCVAR_NOTIFY | FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	g_cvarShowTopspeedTopMenu = CreateConVarEx("showtopspeedtopmenu", "1", "Display a menu to view all the highest topspeeds across all maps?", FCVAR_NOTIFY | FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	g_cvarShowNewTopspeedMapMessage = CreateConVarEx("shownewtopspeedmapmessage", "1", "Display a message when the highest topspeed of the current map is beaten? (automatically disabled for new clients for spam reasons with new maps)", FCVAR_NOTIFY | FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	g_cvarShowZeroTopspeeds = CreateConVarEx("showzerotopspeeds", "0", "Display topspeeds with the value 0?", FCVAR_NOTIFY | FCVAR_PLUGIN, true, 0.0, true, 1.0);
-	g_cvarAmountOfTopspeedMap = CreateConVarEx("amountofrecordsintopspeedmap", "0", "This sets how many records should be shown in the topspeedmap menu (0: unlimited)", FCVAR_NOTIFY | FCVAR_PLUGIN);
-	g_cvarAmountOfTopspeedTop = CreateConVarEx("amountofrecordsintopspeedtop", "10", "This sets how many records should be shown in the topspeedtop menu", FCVAR_NOTIFY | FCVAR_PLUGIN);
-	g_cvarAmountOfPrintedRecords = CreateConVarEx("amountofprintedrecords", "3", "This sets how many records should be printed in chat", FCVAR_NOTIFY | FCVAR_PLUGIN);
-	g_cvarAmountOfSecondsInfoHelpPrintInterval = CreateConVarEx("amountofsecondsinfohelpprintinterval", "240", "This sets per how many seconds an info message for help should be printed in chat (0: disabled)", FCVAR_NOTIFY | FCVAR_PLUGIN);
-	g_cvarDatabaseConfigName = CreateConVarEx("databaseconfigname", "default", "This sets which database config should be used to store the topspeed table in (check addons/sourcemod/configs/databases.cfg)", FCVAR_NOTIFY | FCVAR_PLUGIN);
-	g_cvarExtendedSpeedMeterVersion = CreateConVarEx("version", PLUGIN_VERSION, "This sets sets the current version of the extended speed meter", FCVAR_NOTIFY | FCVAR_PLUGIN);
+	g_cvarUnit = CreateConVarEx("unit", "0", "Unit of measurement of speed (0=kilometers per hour, 1=miles per hour, 2=units per second, 3=meters per second)", FCVAR_NOTIFY, true, 0.0, true, 3.0);
+	g_cvarDisplayTick = CreateConVarEx("tick", "0.2", "This sets how often the display is redrawn (this is the display tick rate).", FCVAR_NOTIFY);
+	g_cvarShowHUD = CreateConVarEx("showhud", "1", "Display the speedmeter HUD?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_cvarShowSpeedToSpecs = CreateConVarEx("showtospecs", "1", "Should spectators be able to see the speed of the one they are spectating?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_cvarShowRoundTopspeeds = CreateConVarEx("showroundtopspeeds", "1", "Display the highest topspeeds of the current round at the end of the round?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_cvarShowGameTopspeeds = CreateConVarEx("showgametopspeeds", "1", "Display the highest topspeeds of the current game at the end of the game?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_cvarShowTopspeedMapMenu = CreateConVarEx("showtopspeedmapmenu", "1", "Display a menu to view all the highest topspeeds of the current map?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_cvarShowTopspeedTopMenu = CreateConVarEx("showtopspeedtopmenu", "1", "Display a menu to view all the highest topspeeds across all maps?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_cvarShowNewTopspeedMapMessage = CreateConVarEx("shownewtopspeedmapmessage", "1", "Display a message when the highest topspeed of the current map is beaten? (automatically disabled for new clients for spam reasons with new maps)", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_cvarShowZeroTopspeeds = CreateConVarEx("showzerotopspeeds", "0", "Display topspeeds with the value 0?", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_cvarAmountOfTopspeedMap = CreateConVarEx("amountofrecordsintopspeedmap", "0", "This sets how many records should be shown in the topspeedmap menu (0: unlimited)", FCVAR_NOTIFY);
+	g_cvarAmountOfTopspeedTop = CreateConVarEx("amountofrecordsintopspeedtop", "10", "This sets how many records should be shown in the topspeedtop menu", FCVAR_NOTIFY);
+	g_cvarAmountOfPrintedRecords = CreateConVarEx("amountofprintedrecords", "3", "This sets how many records should be printed in chat", FCVAR_NOTIFY);
+	g_cvarAmountOfSecondsInfoHelpPrintInterval = CreateConVarEx("amountofsecondsinfohelpprintinterval", "240", "This sets per how many seconds an info message for help should be printed in chat (0: disabled)", FCVAR_NOTIFY);
+	g_cvarDatabaseConfigName = CreateConVarEx("databaseconfigname", "default", "This sets which database config should be used to store the topspeed table in (check addons/sourcemod/configs/databases.cfg)", FCVAR_NOTIFY);
+	g_cvarExtendedSpeedMeterVersion = CreateConVarEx("version", PLUGIN_VERSION, "This sets sets the current version of the extended speed meter", FCVAR_NOTIFY);
 	
 	// Team Fortress 2 and Counter Strike Source cache the game sound so the cvar of soundchecking should be set to 1
 	new String:checkPrecache[1];
@@ -238,7 +238,7 @@ public OnPluginStart()
 	{
 		checkPrecache = "1";
 	}
-	g_cvarCheckSoundPrecache = CreateConVarEx("checksoundprecache", checkPrecache, "Check if the hint sound is precached? (enabling this will make this plugin try to stop the UI/hint.wav, a spamming sound that notifies a player that a hint is displayed) This plugin will enable this automatically for TF2 and CSS. If the game doesn't support this, it will give the 'SV_StartSound: UI/hint.wav not precached (0)' error and then you set this cvar to 0. If the game does support it, it might still give issues, try sv_hudhint_sound 0 to stop the hint sounds or a similar console command.", FCVAR_NOTIFY | FCVAR_PLUGIN, true, 0.0, true, 1.0);
+	g_cvarCheckSoundPrecache = CreateConVarEx("checksoundprecache", checkPrecache, "Check if the hint sound is precached? (enabling this will make this plugin try to stop the UI/hint.wav, a spamming sound that notifies a player that a hint is displayed) This plugin will enable this automatically for TF2 and CSS. If the game doesn't support this, it will give the 'SV_StartSound: UI/hint.wav not precached (0)' error and then you set this cvar to 0. If the game does support it, it might still give issues, try sv_hudhint_sound 0 to stop the hint sounds or a similar console command.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	
 	//g_cvar_FloodTime will be found in OnConfigsExecuted!
 	
