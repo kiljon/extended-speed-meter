@@ -5,6 +5,7 @@ C O M P I L E   O P T I O N S
 
 
 *****************************************************************/
+
 // enforce semicolons after each code statement
 #pragma semicolon 1
 
@@ -15,6 +16,7 @@ P L U G I N   I N C L U D E S
 
 
 *****************************************************************/
+
 #include <sourcemod>
 #include <sdktools>
 #include <smlib>
@@ -32,6 +34,7 @@ P L U G I N   I N F O
 
 
 *****************************************************************/
+
 #define PLUGIN_NAME				"Extended Speed meter"
 #define PLUGIN_TAG				"sm"
 #define PLUGIN_AUTHOR			"kiljon (based on Chanz's work)"
@@ -54,6 +57,7 @@ P L U G I N   D E F I N E S
 
 
 *****************************************************************/
+
 #define MAX_UNIT_TYPES 4
 #define MAX_UNITMESS_LENGTH 5
 
@@ -190,6 +194,7 @@ F O R W A R D   P U B L I C S
 
 
 *****************************************************************/
+
 public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 {
 	
@@ -502,13 +507,13 @@ public OnClientPostAdminCheck(client)
 	Client_Initialize(client);
 }
 
-/****************************************************************
+/*****************************************************************
 
 
 C A L L B A C K   F U N C T I O N S
 
 
-****************************************************************/
+*****************************************************************/
 
 /**
 * ConVar following changes. (StrToInt gives 0 with an error, StrToFloat gives 0.0 with an error)
@@ -1113,6 +1118,7 @@ public CategoryHandler(Handle:menu, TopMenuAction:action, TopMenuObject:object_i
 			Format(buffer, maxlength, "%T:", "Speed meter Commands", param1);
 	}
 }
+
 /*****************************************************************
 
 
@@ -1696,7 +1702,6 @@ stock ShowPersonal(clientCurrent)
 	SQL_TQuery(g_hSQL, ShowPersonalDifferentMapListCallback, sQuery, clientCurrent);
 }
 
-
 /**
 * Callback function for the personal records map list.
 */
@@ -1742,7 +1747,6 @@ public ShowPersonalDifferentMapListCallback(Handle:owner, Handle:hQueryDifferent
 		SQL_TQuery(g_hSQL, ShowPersonalMainCallback, sQuery, clientCurrent);
 	}
 }
-
 
 /**
 * Callback function for the personal map records.
@@ -2248,6 +2252,7 @@ stock InsertNewPlayer(client)
 		return -1;
 	}
 }
+
 /*****************************************************************
 
 
@@ -3065,6 +3070,7 @@ public TopspeedHelpMenuCallBack(Handle:menuhandle, MenuAction:action, Client, Po
 		CloseHandle(menuhandle);
 	}
 }
+
 /*****************************************************************
 
 
@@ -3357,7 +3363,6 @@ stock DeleteDifferentRecord(Client)
 	SQL_TQuery(g_hSQL, DeleteDifferentRecordDifferentMapListCallback, sQuery, Client);
 }
 
-
 /**
 * Callback function for retreiving map list for the delete different record.
 */
@@ -3446,30 +3451,71 @@ public AdminMenu_DeleteAllDifferentRecords(Handle:topmenu, TopMenuAction:action,
 stock DeleteAllDifferentRecord(Client)
 {
 	
+	// First get the different map list
+	
 	// Temporary declaration
-	decl String:map[MAX_MAPNAME_LENGTH];
+	decl String:sQuery[448];
 	
-	// Create the menu
-	new Handle:menuHandle = CreateMenu(TopspeedAdminMenuDeleteRecordDifferentMapAllCallBack);
-	SetMenuTitle(menuHandle, " - %t - \n%t\n", "Speed meter Commands", "Delete all saved speedrecords on a different map");
+	// Create the SQL get query to retreive all maps
+	FormatEx(sQuery, sizeof(sQuery), "SELECT DISTINCT map FROM topspeed WHERE map != '%s' ORDER BY map", g_sCurrentMap);
 	
-	// Options, first retreive all maps
-	GetDifferentMapList();
-	
-	// Get the amount of maps and loop over them
-	new mapListSize = GetArraySize(g_hDifferentMapList);
-	
-	for (new i=0; i<mapListSize; i++)
+	// Activate the query
+	SQL_TQuery(g_hSQL, DeleteAllDifferentRecordDifferentMapListCallback, sQuery, Client);
+}
+
+/**
+* Callback function for retreiving maplist for the delete all different records of a map.
+*/
+public DeleteAllDifferentRecordDifferentMapListCallback(Handle:owner, Handle:hQueryDifferentMapList, const String:sError[], any:Client)
+{
+	if (hQueryDifferentMapList == INVALID_HANDLE)
 	{
-		
-		// Add the map to the options
-		GetArrayString(g_hDifferentMapList, i, map, sizeof(map));
-		AddMenuItem(menuHandle, map, map);
+		// Something went wrong, log the error
+		LogError("%s: SQL error on getting personal records maplist: %s", PLUGIN_NAME, sError);
+		return;
 	}
-	
-	// Display the created menu
-	SetMenuExitBackButton(menuHandle, true);
-	DisplayMenu(menuHandle, Client, MENU_TIME_FOREVER);
+	else
+	{
+		// Temporary declarations
+		decl String:mapName[MAX_MAPNAME_LENGTH];
+		decl String:map[MAX_MAPNAME_LENGTH];
+		
+		// Reset the maplist
+		ClearArray(g_hDifferentMapList);
+		
+		// Get the records if there are any
+		if (SQL_GetRowCount(hQueryDifferentMapList) > 0)
+		{
+			// Fetch Data per Row
+			while (SQL_FetchRow(hQueryDifferentMapList))
+			{
+				// Fetch the values
+				SQL_FetchString(hQueryDifferentMapList, 0, mapName, sizeof(mapName));
+				
+				// Save it locally
+				PushArrayString(g_hDifferentMapList, mapName);
+			}
+		}
+		
+		// Create the menu
+		new Handle:menuHandle = CreateMenu(TopspeedAdminMenuDeleteRecordDifferentMapAllCallBack);
+		SetMenuTitle(menuHandle, " - %t - \n%t\n", "Speed meter Commands", "Delete all saved speedrecords on a different map");
+		
+		// Get the amount of maps and loop over them
+		new mapListSize = GetArraySize(g_hDifferentMapList);
+		
+		for (new i=0; i<mapListSize; i++)
+		{
+			
+			// Add the map to the options
+			GetArrayString(g_hDifferentMapList, i, map, sizeof(map));
+			AddMenuItem(menuHandle, map, map);
+		}
+		
+		// Display the created menu
+		SetMenuExitBackButton(menuHandle, true);
+		DisplayMenu(menuHandle, Client, MENU_TIME_FOREVER);
+	}
 }
 
 /*****************************************************************
@@ -3933,7 +3979,6 @@ stock DeleteMapRecord(String:clientSteamId[], String:topspeedTimeStamp[])
 	SQL_TQuery(g_hSQL, DeleteMapRecordCallback, sQuery, _);
 }
 
-
 /**
 * Callback function for deleting a record.
 */
@@ -3979,52 +4024,4 @@ public DeleteMapRecordsCallback(Handle:owner, Handle:hQuery, const String:sError
 		LogError("%s: SQL error on deleting speedrecords: %s", PLUGIN_NAME, sError);
 		return;
 	}
-}
-
-/**
-* Get all the maps that appear in the database.
-*/
-stock GetDifferentMapList()
-{
-	
-	// Temporary declarations
-	decl String:mapName[MAX_MAPNAME_LENGTH];
-	decl String:sQuery[448], String:sError[255];
-	
-	// Reset the maplist
-	ClearArray(g_hDifferentMapList);
-	
-	// Create the SQL get query to retreive all records from the current map
-	FormatEx(sQuery, sizeof(sQuery), "SELECT DISTINCT map FROM topspeed WHERE map != '%s' ORDER BY map", g_sCurrentMap);
-	
-	// Lock the database for usage and create a handle to activate the query
-	SQL_LockDatabase(g_hSQL);
-	new Handle:hQuery = SQL_Query(g_hSQL, sQuery);
-	
-	if (hQuery == INVALID_HANDLE)
-	{
-		// Something went wrong, log the error and unlock the database
-		SQL_GetError(g_hSQL, sError, sizeof(sError));
-		LogError("%s: SQL error on getting all different maps: %s", PLUGIN_NAME, sError);
-		SQL_UnlockDatabase(g_hSQL);
-		return;
-	}
-	
-	// Get the records if there are any
-	if (SQL_GetRowCount(hQuery) > 0)
-	{
-		// Fetch Data per Row
-		while (SQL_FetchRow(hQuery))
-		{
-			// Fetch the values
-			SQL_FetchString(hQuery, 0, mapName, sizeof(mapName));
-			
-			// Save it locally
-			PushArrayString(g_hDifferentMapList, mapName);
-		}
-	}
-	
-	// Unlock the database for usage and close the handle
-	SQL_UnlockDatabase(g_hSQL); 
-	CloseHandle(hQuery);
 }
