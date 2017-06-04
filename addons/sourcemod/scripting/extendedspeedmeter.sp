@@ -2389,21 +2389,20 @@ public TopspeedPersonalMenuCallBack(Handle:menuhandle, MenuAction:action, Client
 		decl String:choice[MAX_MAPNAME_LENGTH];
 		GetMenuItem(menuhandle, Position, choice, sizeof(choice));
 		
-		// Create the menu
-		new Handle:menuHandle = CreateMenu(TopspeedPersonalSubMenuCallBack);
-		SetMenuTitle(menuHandle, " - %t - \n%t %s\n", "Personal speedrecords", "All speedrecords of", choice);
-		
-		// Temporary declarations
-		decl String:clientName[MAX_NAME_LENGTH];
-		decl String:clientSteamId[MAX_STEAMAUTH_LENGTH];
-		decl Float:topspeed;
-		decl String:recordString[50];
-		new size = 0;
-		
-		
 		// Check if it is the current map
 		if (StrEqual(choice, g_sCurrentMap))
 		{
+			// Create the menu
+			new Handle:menuHandle = CreateMenu(TopspeedPersonalSubMenuCallBack);
+			SetMenuTitle(menuHandle, " - %t - \n%t %s\n", "Personal speedrecords", "All speedrecords of", choice);
+			
+			// Temporary declarations
+			decl String:clientName[MAX_NAME_LENGTH];
+			decl String:clientSteamId[MAX_STEAMAUTH_LENGTH];
+			decl Float:topspeed;
+			decl String:recordString[50];
+			new size = 0;
+			
 			// It's the current map, get all records and sort them
 			CombineAllMapRecords();
 			SortAllMapRecords();
@@ -2428,18 +2427,106 @@ public TopspeedPersonalMenuCallBack(Handle:menuhandle, MenuAction:action, Client
 					AddMenuItem(menuHandle, choice, recordString);
 				}
 			}
+			
+			// Display the created menu
+			SetMenuExitBackButton(menuHandle, true);
+			DisplayMenu(menuHandle, Client, MENU_TIME_FOREVER);
 		}
 		else
 		{
-			// Reset the dynamic arrays
-			ClearArray(g_hDifferentMapRecordSteamId);
-			ClearArray(g_hDifferentMapRecordName);
-			ClearArray(g_hDifferentMapRecordMaxSpeed);
-			ClearArray(g_hDifferentMapRecordMaxSpeedTimeStamp);
-			ClearArray(g_hDifferentMapRecordMapName);
+			// Get the records of that different map
 			
-			// Get all records of the different map
-			GetMapRecords(choice);
+			// Temporary declaration
+			decl String:sQuery[448];
+			
+			// Create the SQL get query to retreive all records from the map
+			FormatEx(sQuery, sizeof(sQuery), "SELECT auth, name, speed, timestamp, map FROM topspeed WHERE map = '%s' ORDER BY speed DESC", choice);
+			
+			// Activate the query
+			SQL_TQuery(g_hSQL, TopspeedPersonalDifferentMapMenuCallBack, sQuery, Client);
+		}
+	}
+	else if (action == MenuAction_End)
+	{
+		CloseHandle(menuhandle);
+	}
+}
+
+/**
+* Callback function for the map records loading for topspeed personal.
+*/
+public TopspeedPersonalDifferentMapMenuCallBack(Handle:owner, Handle:hQuery, const String:sError[], any:Client)
+{
+	
+	if (hQuery == INVALID_HANDLE)
+	{
+		// Something went wrong, log the error
+		LogError("%s: SQL error on getting map records for topspeed personal: %s", PLUGIN_NAME, sError);
+		return;
+	}
+	else
+	{
+		// Temporary declarations
+		decl String:clientSteamId[MAX_STEAMAUTH_LENGTH];
+		decl String:clientName[MAX_NAME_LENGTH];
+		decl String:topspeedTimeStamp[20];
+		decl String:map[MAX_MAPNAME_LENGTH];
+		decl Float:topspeed;
+		decl String:recordString[50];
+		new size = 0;
+		
+		// Reset the dynamic arrays
+		ClearArray(g_hDifferentMapRecordSteamId);
+		ClearArray(g_hDifferentMapRecordName);
+		ClearArray(g_hDifferentMapRecordMaxSpeed);
+		ClearArray(g_hDifferentMapRecordMaxSpeedTimeStamp);
+		ClearArray(g_hDifferentMapRecordMapName);
+		
+		// Get the records if there are any
+		if (SQL_GetRowCount(hQuery) > 0)
+		{
+			// Fetch Data per Row
+			while (SQL_FetchRow(hQuery))
+			{
+				// Fetch the values
+				SQL_FetchString(hQuery, 0, clientSteamId, sizeof(clientSteamId));
+				SQL_FetchString(hQuery, 1, clientName, sizeof(clientName));
+				topspeed = Float:SQL_FetchFloat(hQuery, 2);
+				SQL_FetchString(hQuery, 3, topspeedTimeStamp, sizeof(topspeedTimeStamp));
+				SQL_FetchString(hQuery, 4, map, sizeof(map));
+				
+				// Easy debug
+				// PrintToServer("############# GET RECORD #############");
+				// PrintToServer("%s %s %f %s %s", clientSteamId, clientName, topspeed, topspeedTimeStamp, map);
+				// PrintToServer("############# ---------- #############");
+				
+				// Save it locally
+				if (StrEqual(map, g_sCurrentMap, false))
+				{
+					PushArrayString(g_hRecordSteamId, clientSteamId);
+					PushArrayString(g_hRecordName, clientName);
+					PushArrayCell(g_hRecordMaxSpeed, topspeed);
+					PushArrayString(g_hRecordMaxSpeedTimeStamp, topspeedTimeStamp);
+					
+					// Save the current highest speedrecord
+					if (topspeed > g_fHighestSpeedrecord)
+					{
+						g_fHighestSpeedrecord = topspeed;
+					}
+				}
+				else
+				{
+					PushArrayString(g_hDifferentMapRecordSteamId, clientSteamId);
+					PushArrayString(g_hDifferentMapRecordName, clientName);
+					PushArrayCell(g_hDifferentMapRecordMaxSpeed, topspeed);
+					PushArrayString(g_hDifferentMapRecordMaxSpeedTimeStamp, topspeedTimeStamp);
+					PushArrayString(g_hDifferentMapRecordMapName, map);
+				}
+			}
+			
+			// Create the menu
+			new Handle:menuHandle = CreateMenu(TopspeedPersonalSubMenuCallBack);
+			SetMenuTitle(menuHandle, " - %t - \n%t %s\n", "Personal speedrecords", "All speedrecords of", map);
 			
 			// Get the amount of records
 			size = GetArraySize(g_hDifferentMapRecordName);
@@ -2452,24 +2539,21 @@ public TopspeedPersonalMenuCallBack(Handle:menuhandle, MenuAction:action, Client
 				GetArrayString(g_hDifferentMapRecordName, i, clientName, sizeof(clientName));
 				GetArrayString(g_hDifferentMapRecordSteamId, i, clientSteamId, sizeof(clientSteamId));
 				topspeed = Float:GetArrayCell(g_hDifferentMapRecordMaxSpeed, i) * g_fUnitMess_Calc[g_iPlugin_Unit];
+				GetArrayString(g_hDifferentMapRecordMapName, i, map, sizeof(map));
 				
 				// Don't add zero speeds if wanted
 				if (topspeed > 0 || g_bPlugin_ShowZeroTopspeeds)
 				{
 					// Add the record to the menu
 					Format(recordString, 50, "%s (%.1f %s)", clientName, topspeed, g_szUnitMess_Name[g_iPlugin_Unit]);
-					AddMenuItem(menuHandle, choice, recordString);
+					AddMenuItem(menuHandle, map, recordString);
 				}
 			}
+			
+			// Display the created menu
+			SetMenuExitBackButton(menuHandle, true);
+			DisplayMenu(menuHandle, Client, MENU_TIME_FOREVER);
 		}
-		
-		// Display the created menu
-		SetMenuExitBackButton(menuHandle, true);
-		DisplayMenu(menuHandle, Client, MENU_TIME_FOREVER);
-	}
-	else if (action == MenuAction_End)
-	{
-		CloseHandle(menuhandle);
 	}
 }
 
