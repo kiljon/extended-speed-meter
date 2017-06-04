@@ -3854,6 +3854,13 @@ public GetHighestOverallTopspeedRecordsMainCallback(Handle:owner, Handle:hQuery,
 	}
 	else
 	{
+		// Temporary declarations
+		decl String:clientName[MAX_NAME_LENGTH];
+		decl String:clientSteamId[MAX_STEAMAUTH_LENGTH];
+		decl String:topspeedTimeStamp[20];
+		decl String:mapName[MAX_MAPNAME_LENGTH];
+		decl Float:topspeed;
+			
 		// Empty the arrays to keep all records in
 		ClearArray(g_hHighestOverallSteamId);
 		ClearArray(g_hHighestOverallName);
@@ -3864,13 +3871,6 @@ public GetHighestOverallTopspeedRecordsMainCallback(Handle:owner, Handle:hQuery,
 		// Get the records if there are any
 		if (SQL_GetRowCount(hQuery) > 0)
 		{
-			// Temporary declarations
-			decl String:clientName[MAX_NAME_LENGTH];
-			decl String:clientSteamId[MAX_STEAMAUTH_LENGTH];
-			decl String:topspeedTimeStamp[20];
-			decl String:mapName[MAX_MAPNAME_LENGTH];
-			decl Float:topspeed;
-			
 			// Fetch Data per Row
 			while (SQL_FetchRow(hQuery))
 			{

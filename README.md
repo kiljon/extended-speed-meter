@@ -1,6 +1,6 @@
 # Extended Speed Meter Plugin
 
-This is a sourcemod plugin that tracks the maximum velocity on different maps. [Forum link](https://forums.alliedmods.net/showthread.php?t=270630)
+This is a [SourceMod](https://github.com/alliedmodders/sourcemod) plugin that tracks the maximum velocity on different maps. [Forum link](https://forums.alliedmods.net/showthread.php?t=270630)
 
 # About
 
@@ -66,7 +66,7 @@ sm_extendedspeedmeter_enable "1"
 // Default: "1" Minimum: "0.000000" Maximum: "1.000000"
 sm_extendedspeedmeter_showgametopspeeds "1"
 
-// Display the speedmeter HUD?
+// Display the speedmeter HUD? Version 1.4+
 // Default: "1" Minimum: "0.000000" Maximum: "1.000000"
 sm_extendedspeedmeter_showhud "1"
 
@@ -132,7 +132,7 @@ sm_extendedspeedmeter_unit "0"
 
 * [SMLib](https://forums.alliedmods.net/showthread.php?t=148387) (included in .zip)
 * [Colors](https://forums.alliedmods.net/showthread.php?t=96831) (included in .zip)
-* Sourcemod 1.6.2+
+* Sourcemod 1.6.2+ (mainly due to [Steam Auth API changes](https://wiki.alliedmods.net/SourceMod_1.6.2_Release_Notes)), compatible with 1.7.0+, 1.8 (6002) and 1.9 (6098-dev)
 * Sourcemod Admin menu (optional)
 
 # Verified working games

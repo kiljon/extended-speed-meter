@@ -1,6 +1,13 @@
 # Changelog
 This log shows interesting changes that happen for each version, latest versions first.
 
+# Version 1.4 (4 June 2017)
+
+* Performance improvements (Async database calls)
+* Fix for default database configuration
+* Convar to disable Speed Meter HUD
+* Small code refactors
+
 # Version 1.3 (8 September 2015)
 
 * Verified DoD, HL2 DM, L4D2 and TF2 compatibility
