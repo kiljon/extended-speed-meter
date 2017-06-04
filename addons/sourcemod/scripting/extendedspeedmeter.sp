@@ -3911,33 +3911,32 @@ stock DeleteMapRecord(String:clientSteamId[], String:topspeedTimeStamp[])
 stock DeleteMapRecords(String:map[])
 {
 	
-	// Temporary declarations
-	decl String:sQuery[256], String:sError[255];
-	
-	// Create the SQL insert query
-	FormatEx(sQuery, sizeof(sQuery), "DELETE FROM topspeed WHERE map = '%s'", map);
-	
-	// Lock the database for usage and create a handle to activate the query
-	SQL_LockDatabase(g_hSQL);
-	new Handle:hQuery = SQL_Query(g_hSQL, sQuery);
+	// Temporary declaration
+	decl String:sQuery[448];
 	
 	// Easy debug
 	// PrintToServer("############# DELETE RECORDS #############");
 	// PrintToServer("all map records %s", map);
 	// PrintToServer("############# -------------- #############");
 	
+	// Create the SQL insert query
+	FormatEx(sQuery, sizeof(sQuery), "DELETE FROM topspeed WHERE map = '%s'", map);
+	
+	// Activate the query
+	SQL_TQuery(g_hSQL, DeleteMapRecordsCallback, sQuery, _);
+}
+
+/**
+* Callback function for deleting all records.
+*/
+public DeleteMapRecordsCallback(Handle:owner, Handle:hQuery, const String:sError[], any:clientCurrent)
+{
 	if (hQuery == INVALID_HANDLE)
 	{
-		// Something went wrong, log the error and unlock the database
-		SQL_GetError(g_hSQL, sError, sizeof(sError));
-		LogError("%s: SQL error on delete: %s", PLUGIN_NAME, sError);
-		SQL_UnlockDatabase(g_hSQL);
+		// Something went wrong, log the error
+		LogError("%s: SQL error on deleting speedrecords: %s", PLUGIN_NAME, sError);
 		return;
 	}
-	
-	// Unlock the database for usage and close the handle
-	SQL_UnlockDatabase(g_hSQL); 
-	CloseHandle(hQuery);
 }
 
 /**
