@@ -1518,15 +1518,22 @@ stock ShowBestAllTime(clientCurrent, bool:printInChat = true)
 stock ShowHighestOverall(clientCurrent, bool:printInChat = true)
 {
 	
+	// Get the highest overall speedrecords (database function)
+	GetHighestOverallTopspeedRecords(clientCurrent, printInChat);
+}
+
+/**
+* Display the highest speedrecords ever, and show a menu to the current client to browse through all records.
+*/
+stock ShowHighestOverallMain(clientCurrent, bool:printInChat = true)
+{
+	
 	// Temporary declarations
 	decl String:recordString[50];
 	decl String:clientName[MAX_NAME_LENGTH];
 	decl String:clientSteamId[MAX_STEAMAUTH_LENGTH];
 	decl Float:topspeed;
 	decl String:currentClientSteamId[MAX_STEAMAUTH_LENGTH];
-	
-	// Get the highest overall topspeeds (database function)
-	GetHighestOverallTopspeedRecords();
 	
 	// Display the records
 	
@@ -3807,139 +3814,153 @@ stock GetMapRecords(String:map[])
 /**
 * Get the highest overall speedrecords in the database.
 */
-stock GetHighestOverallTopspeedRecords()
+stock GetHighestOverallTopspeedRecords(clientCurrent, bool:printInChat)
 {
 	
-	// Temporary declarations
-	decl String:clientName[MAX_NAME_LENGTH];
-	decl String:clientSteamId[MAX_STEAMAUTH_LENGTH];
-	decl String:topspeedTimeStamp[20];
-	decl String:mapName[MAX_MAPNAME_LENGTH];
-	decl Float:topspeed;
-	decl String:sQuery[448], String:sError[255];
-	
-	// Empty the arrays to keep all records in
-	ClearArray(g_hHighestOverallSteamId);
-	ClearArray(g_hHighestOverallName);
-	ClearArray(g_hHighestOverallMapName);
-	ClearArray(g_hHighestOverallMaxSpeed);
-	ClearArray(g_hHighestOverallMaxSpeedTimeStamp);
-	
-	// Create the SQL get query to retreive all highest topspeed records without the current map, oldest records get a higher priority with equal speeds
-	FormatEx(sQuery, sizeof(sQuery), "SELECT auth, name, speed, timestamp, map FROM topspeed WHERE map != '%s' ORDER BY speed DESC, timestamp ASC LIMIT %d", g_sCurrentMap, g_iPlugin_AmountOfTopspeedTop);
-	
-	// Lock the database for usage and create a handle to activate the query
-	SQL_LockDatabase(g_hSQL);
-	new Handle:hQuery = SQL_Query(g_hSQL, sQuery);
-	
-	if (hQuery == INVALID_HANDLE)
+	// If it should not be printed then it was already retrieved
+	if (!printInChat)
 	{
-		// Something went wrong, log the error and unlock the database
-		SQL_GetError(g_hSQL, sError, sizeof(sError));
-		LogError("%s: SQL error on getting the highest speedrecords: %s", PLUGIN_NAME, sError);
-		SQL_UnlockDatabase(g_hSQL);
-		return;
-	}
-	
-	// Get the records if there are any
-	if (SQL_GetRowCount(hQuery) > 0)
-	{
-		// Fetch Data per Row
-		while (SQL_FetchRow(hQuery))
-		{
-			// Fetch the values
-			SQL_FetchString(hQuery, 0, clientSteamId, sizeof(clientSteamId));
-			SQL_FetchString(hQuery, 1, clientName, sizeof(clientName));
-			topspeed = (Float:SQL_FetchFloat(hQuery, 2) * g_fUnitMess_Calc[g_iPlugin_Unit]);
-			SQL_FetchString(hQuery, 3, topspeedTimeStamp, sizeof(topspeedTimeStamp));
-			SQL_FetchString(hQuery, 4, mapName, sizeof(mapName));
-			
-			// Only show zero values if it is set to do so
-			if (topspeed > 0 || g_bPlugin_ShowZeroTopspeeds)
-			{
-				// Save it locally
-				PushArrayString(g_hHighestOverallSteamId, clientSteamId);
-				PushArrayString(g_hHighestOverallName, clientName);
-				PushArrayCell(g_hHighestOverallMaxSpeed, Float:SQL_FetchFloat(hQuery, 2));
-				PushArrayString(g_hHighestOverallMaxSpeedTimeStamp, topspeedTimeStamp);
-				PushArrayString(g_hHighestOverallMapName, mapName);
-			}
-		}
-	}
-	
-	// Unlock the database for usage and close the handle
-	SQL_UnlockDatabase(g_hSQL); 
-	CloseHandle(hQuery);
-	
-	// Now add all topspeed records of the current map
-	
-	// Combine and sort all records of the current map
-	CombineAllMapRecords();
-	SortAllMapRecords();
-	
-	// Find the amount of records that are higher then the lowest in the best ever
-	new amountOfHigherRecordsInCurrentMap = 0;
-	
-	// Verify that there are previous records found
-	if (GetArraySize(g_hHighestOverallMaxSpeed) > 0)
-	{
-		while (GetArrayCell(g_hAllMaxSpeed, amountOfHigherRecordsInCurrentMap) > GetArrayCell(g_hHighestOverallMaxSpeed, GetArraySize(g_hHighestOverallMaxSpeed) - 1))
-		{
-			amountOfHigherRecordsInCurrentMap++;
-			
-			// Make sure not to go over the current amount of topspeeds and break if so
-			if (amountOfHigherRecordsInCurrentMap >= GetArraySize(g_hAllMaxSpeed))
-			{
-				break;
-			}
-		}
+		ShowHighestOverallMain(clientCurrent, false);
 	}
 	else
 	{
-		// No records found in the database yet
-		amountOfHigherRecordsInCurrentMap = GetArraySize(g_hAllMaxSpeed);
+		// Temporary declaration
+		decl String:sQuery[448];
+		
+		// Create the SQL get query to retreive all highest speedrecords without the current map, oldest records get a higher priority with equal speeds
+		FormatEx(sQuery, sizeof(sQuery), "SELECT auth, name, speed, timestamp, map FROM topspeed WHERE map != '%s' ORDER BY speed DESC, timestamp ASC LIMIT %d", g_sCurrentMap, g_iPlugin_AmountOfTopspeedTop);
+		
+		// Activate the query
+		SQL_TQuery(g_hSQL, GetHighestOverallTopspeedRecordsMainCallback, sQuery, clientCurrent);
 	}
-	
-	// Make sure to fully populate the amount if needed
-	new actualAmountOfMapRecordsToAdd = 0;
-	new minimumAmountOfMapRecordsToAdd = g_iPlugin_AmountOfTopspeedTop - GetArraySize(g_hHighestOverallMaxSpeed);
-	if (amountOfHigherRecordsInCurrentMap < minimumAmountOfMapRecordsToAdd)
+}
+
+/**
+* Callback function for the overall highest speeds records.
+*/
+public GetHighestOverallTopspeedRecordsMainCallback(Handle:owner, Handle:hQuery, const String:sError[], any:clientCurrent)
+{
+	if (hQuery == INVALID_HANDLE)
 	{
-		// Make sure it is fully populated, but don't add more then possible
-		if (GetArraySize(g_hAllMaxSpeed) < minimumAmountOfMapRecordsToAdd)
+		// Something went wrong, log the error
+		LogError("%s: SQL error on getting the highest speedrecords: %s", PLUGIN_NAME, sError);
+		return;
+	}
+	else
+	{
+		// Empty the arrays to keep all records in
+		ClearArray(g_hHighestOverallSteamId);
+		ClearArray(g_hHighestOverallName);
+		ClearArray(g_hHighestOverallMapName);
+		ClearArray(g_hHighestOverallMaxSpeed);
+		ClearArray(g_hHighestOverallMaxSpeedTimeStamp);
+		
+		// Get the records if there are any
+		if (SQL_GetRowCount(hQuery) > 0)
 		{
-			actualAmountOfMapRecordsToAdd = GetArraySize(g_hAllMaxSpeed);
+			// Temporary declarations
+			decl String:clientName[MAX_NAME_LENGTH];
+			decl String:clientSteamId[MAX_STEAMAUTH_LENGTH];
+			decl String:topspeedTimeStamp[20];
+			decl String:mapName[MAX_MAPNAME_LENGTH];
+			decl Float:topspeed;
+			
+			// Fetch Data per Row
+			while (SQL_FetchRow(hQuery))
+			{
+				// Fetch the values
+				SQL_FetchString(hQuery, 0, clientSteamId, sizeof(clientSteamId));
+				SQL_FetchString(hQuery, 1, clientName, sizeof(clientName));
+				topspeed = (Float:SQL_FetchFloat(hQuery, 2) * g_fUnitMess_Calc[g_iPlugin_Unit]);
+				SQL_FetchString(hQuery, 3, topspeedTimeStamp, sizeof(topspeedTimeStamp));
+				SQL_FetchString(hQuery, 4, mapName, sizeof(mapName));
+				
+				// Only show zero values if it is set to do so
+				if (topspeed > 0 || g_bPlugin_ShowZeroTopspeeds)
+				{
+					// Save it locally
+					PushArrayString(g_hHighestOverallSteamId, clientSteamId);
+					PushArrayString(g_hHighestOverallName, clientName);
+					PushArrayCell(g_hHighestOverallMaxSpeed, Float:SQL_FetchFloat(hQuery, 2));
+					PushArrayString(g_hHighestOverallMaxSpeedTimeStamp, topspeedTimeStamp);
+					PushArrayString(g_hHighestOverallMapName, mapName);
+				}
+			}
+		}
+		
+		// Now add all speedrecords of the current map
+		
+		// Combine and sort all records of the current map
+		CombineAllMapRecords();
+		SortAllMapRecords();
+		
+		// Find the amount of records that are higher then the lowest in the best ever
+		new amountOfHigherRecordsInCurrentMap = 0;
+		
+		// Verify that there are previous records found
+		if (GetArraySize(g_hHighestOverallMaxSpeed) > 0)
+		{
+			while (GetArrayCell(g_hAllMaxSpeed, amountOfHigherRecordsInCurrentMap) > GetArrayCell(g_hHighestOverallMaxSpeed, GetArraySize(g_hHighestOverallMaxSpeed) - 1))
+			{
+				amountOfHigherRecordsInCurrentMap++;
+				
+				// Make sure not to go over the current amount of topspeeds and break if so
+				if (amountOfHigherRecordsInCurrentMap >= GetArraySize(g_hAllMaxSpeed))
+				{
+					break;
+				}
+			}
 		}
 		else
 		{
-			actualAmountOfMapRecordsToAdd = minimumAmountOfMapRecordsToAdd;
+			// No records found in the database yet
+			amountOfHigherRecordsInCurrentMap = GetArraySize(g_hAllMaxSpeed);
 		}
-	}
-	else
-	{
-		actualAmountOfMapRecordsToAdd = amountOfHigherRecordsInCurrentMap;
-	}
-	
-	// Add the amount of records of the current map to add
-	for (new i=0; i<actualAmountOfMapRecordsToAdd; i++)
-	{
+			
+		// Make sure to fully populate the amount if needed
+		new actualAmountOfMapRecordsToAdd = 0;
+		new minimumAmountOfMapRecordsToAdd = g_iPlugin_AmountOfTopspeedTop - GetArraySize(g_hHighestOverallMaxSpeed);
+		if (amountOfHigherRecordsInCurrentMap < minimumAmountOfMapRecordsToAdd)
+		{
+			// Make sure it is fully populated, but don't add more then possible
+			if (GetArraySize(g_hAllMaxSpeed) < minimumAmountOfMapRecordsToAdd)
+			{
+				actualAmountOfMapRecordsToAdd = GetArraySize(g_hAllMaxSpeed);
+			}
+			else
+			{
+				actualAmountOfMapRecordsToAdd = minimumAmountOfMapRecordsToAdd;
+			}
+		}
+		else
+		{
+			actualAmountOfMapRecordsToAdd = amountOfHigherRecordsInCurrentMap;
+		}
 		
-		// Get the topspeed data
-		GetArrayString(g_hAllName, i, clientName, sizeof(clientName));
-		GetArrayString(g_hAllSteamId, i, clientSteamId, sizeof(clientSteamId));
-		GetArrayString(g_hAllMaxSpeedTimeStamp, i, topspeedTimeStamp, sizeof(topspeedTimeStamp));
-		topspeed = Float:GetArrayCell(g_hAllMaxSpeed, i);
+		// Add the amount of records of the current map to add
+		for (new i=0; i<actualAmountOfMapRecordsToAdd; i++)
+		{
+			
+			// Get the topspeed data
+			GetArrayString(g_hAllName, i, clientName, sizeof(clientName));
+			GetArrayString(g_hAllSteamId, i, clientSteamId, sizeof(clientSteamId));
+			GetArrayString(g_hAllMaxSpeedTimeStamp, i, topspeedTimeStamp, sizeof(topspeedTimeStamp));
+			topspeed = Float:GetArrayCell(g_hAllMaxSpeed, i);
+			
+			// Add it to the dynamic arrays
+			PushArrayString(g_hHighestOverallSteamId, clientSteamId);
+			PushArrayString(g_hHighestOverallName, clientName);
+			PushArrayCell(g_hHighestOverallMaxSpeed, topspeed);
+			PushArrayString(g_hHighestOverallMaxSpeedTimeStamp, topspeedTimeStamp);
+			PushArrayString(g_hHighestOverallMapName, g_sCurrentMap);
+		}
 		
-		// Add it to the dynamic arrays
-		PushArrayString(g_hHighestOverallSteamId, clientSteamId);
-		PushArrayString(g_hHighestOverallName, clientName);
-		PushArrayCell(g_hHighestOverallMaxSpeed, topspeed);
-		PushArrayString(g_hHighestOverallMaxSpeedTimeStamp, topspeedTimeStamp);
-		PushArrayString(g_hHighestOverallMapName, g_sCurrentMap);
+		// Sort the dynamic arrays
+		SortHighestOverallRecords();
+		
+		// Now show the records
+		ShowHighestOverallMain(clientCurrent, true);
 	}
-	
-	// Sort the dynamic arrays
-	SortHighestOverallRecords();
 }
 
 /**
