@@ -3794,10 +3794,6 @@ stock GetMapRecords(String:map[])
 {
 	
 	// Temporary declarations
-	decl String:clientSteamId[MAX_STEAMAUTH_LENGTH];
-	decl String:clientName[MAX_NAME_LENGTH];
-	decl String:topspeedTimeStamp[20];
-	decl Float:topspeed;
 	decl String:sQuery[448], String:sError[255];
 	
 	// Create the SQL get query to retreive all records from the map
@@ -3819,6 +3815,12 @@ stock GetMapRecords(String:map[])
 	// Get the records if there are any
 	if (SQL_GetRowCount(hQuery) > 0)
 	{
+		// Temporary declarations
+		decl String:clientName[MAX_NAME_LENGTH];
+		decl String:clientSteamId[MAX_STEAMAUTH_LENGTH];
+		decl String:topspeedTimeStamp[20];
+		decl Float:topspeed;
+		
 		// Fetch Data per Row
 		while (SQL_FetchRow(hQuery))
 		{
@@ -3895,7 +3897,7 @@ stock GetHighestOverallTopspeedRecords()
 	{
 		// Something went wrong, log the error and unlock the database
 		SQL_GetError(g_hSQL, sError, sizeof(sError));
-		LogError("%s: SQL error on getting map records: %s", PLUGIN_NAME, sError);
+		LogError("%s: SQL error on getting the highest speedrecords: %s", PLUGIN_NAME, sError);
 		SQL_UnlockDatabase(g_hSQL);
 		return;
 	}
