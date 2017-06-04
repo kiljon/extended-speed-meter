@@ -2083,8 +2083,8 @@ stock SortHighestOverallRecords()
 				SwapArrayItems(g_hHighestOverallMaxSpeedTimeStamp, i, j);
 				SwapArrayItems(g_hHighestOverallMaxSpeed, i, j);
 				SwapArrayItems(g_hHighestOverallMapName, i, j);
-			} 
-		} 
+			}
+		}
 	}
 }
 
@@ -2831,47 +2831,17 @@ public TopspeedAdminMenuDeleteRecordDifferentMapCallBack(Handle:menuhandle, Menu
 		// Get the chosen item, the different map
 		new String:choice[MAX_MAPNAME_LENGTH];
 		GetMenuItem(menuhandle, Position, choice, sizeof(choice));
-	
-		// Reset the dynamic arrays
-		ClearArray(g_hDifferentMapRecordSteamId);
-		ClearArray(g_hDifferentMapRecordName);
-		ClearArray(g_hDifferentMapRecordMaxSpeed);
-		ClearArray(g_hDifferentMapRecordMaxSpeedTimeStamp);
-		ClearArray(g_hDifferentMapRecordMapName);
 		
-		// Retreive all records from the database
-		GetMapRecords(choice);
+		// Get the records of that different map
 		
-		// Get the amount of records
-		new size = GetArraySize(g_hDifferentMapRecordMaxSpeed);
+		// Temporary declaration
+		decl String:sQuery[448];
 		
-		// Temporary declarations
-		decl String:recordString[50];
-		decl String:clientName[MAX_NAME_LENGTH];
-		decl String:clientSteamId[MAX_STEAMAUTH_LENGTH];
-		decl Float:topspeed;
+		// Create the SQL get query to retreive all records from the map
+		FormatEx(sQuery, sizeof(sQuery), "SELECT auth, name, speed, timestamp, map FROM topspeed WHERE map = '%s' ORDER BY speed DESC", choice);
 		
-		// Create the menu
-		new Handle:menuHandle = CreateMenu(TopspeedAdminMenuDeleteRecordDifferentMapRecordSelectedCallBack);
-		SetMenuTitle(menuHandle, " - %t - \n%t\n%t %s\n", "Speed meter Commands", "Delete a saved speedrecord on a different map", "All speedrecords of", choice);
-		
-		// Loop over all records
-		for (new i=0; i<size; i++)
-		{
-			
-			// Catch all data of that record
-			GetArrayString(g_hDifferentMapRecordName, i, clientName, sizeof(clientName));
-			GetArrayString(g_hDifferentMapRecordSteamId, i, clientSteamId, sizeof(clientSteamId));
-			topspeed = Float:GetArrayCell(g_hDifferentMapRecordMaxSpeed, i) * g_fUnitMess_Calc[g_iPlugin_Unit];
-			
-			// Add the record to the menu
-			Format(recordString, 50, "%s (%.1f %s)", clientName, topspeed, g_szUnitMess_Name[g_iPlugin_Unit]);
-			AddMenuItem(menuHandle, clientSteamId, recordString);
-		}
-		
-		// Display the created menu
-		SetMenuExitBackButton(menuHandle, true);
-		DisplayMenu(menuHandle, clientCurrent, MENU_TIME_FOREVER);
+		// Activate the query
+		SQL_TQuery(g_hSQL, TopspeedAdminMenuDeleteRecordDifferentMapListingCallBack, sQuery, clientCurrent);
 	}
 	else if (action == MenuAction_Cancel)
 	{
@@ -2885,6 +2855,105 @@ public TopspeedAdminMenuDeleteRecordDifferentMapCallBack(Handle:menuhandle, Menu
 	else if (action == MenuAction_End)
 	{
 		CloseHandle(menuhandle);
+	}
+}
+
+/**
+* Callback function for the map records loading for topspeed delete menu.
+*/
+public TopspeedAdminMenuDeleteRecordDifferentMapListingCallBack(Handle:menuhandle, Handle:hQuery, const String:sError[], any:Client)
+{
+	
+	if (hQuery == INVALID_HANDLE)
+	{
+		// Something went wrong, log the error
+		LogError("%s: SQL error on getting map records for topspeed personal: %s", PLUGIN_NAME, sError);
+		return;
+	}
+	else
+	{
+		// Temporary declarations
+		decl String:recordString[50];
+		decl String:clientName[MAX_NAME_LENGTH];
+		decl String:clientSteamId[MAX_STEAMAUTH_LENGTH];
+		decl Float:topspeed;
+		decl String:topspeedTimeStamp[20];
+		decl String:map[MAX_MAPNAME_LENGTH];
+		
+		// Reset the dynamic arrays
+		ClearArray(g_hDifferentMapRecordSteamId);
+		ClearArray(g_hDifferentMapRecordName);
+		ClearArray(g_hDifferentMapRecordMaxSpeed);
+		ClearArray(g_hDifferentMapRecordMaxSpeedTimeStamp);
+		ClearArray(g_hDifferentMapRecordMapName);
+		
+		// Get the records if there are any
+		if (SQL_GetRowCount(hQuery) > 0)
+		{
+			// Fetch Data per Row
+			while (SQL_FetchRow(hQuery))
+			{
+				// Fetch the values
+				SQL_FetchString(hQuery, 0, clientSteamId, sizeof(clientSteamId));
+				SQL_FetchString(hQuery, 1, clientName, sizeof(clientName));
+				topspeed = Float:SQL_FetchFloat(hQuery, 2);
+				SQL_FetchString(hQuery, 3, topspeedTimeStamp, sizeof(topspeedTimeStamp));
+				SQL_FetchString(hQuery, 4, map, sizeof(map));
+				
+				// Easy debug
+				// PrintToServer("############# GET RECORD #############");
+				// PrintToServer("%s %s %f %s %s", clientSteamId, clientName, topspeed, topspeedTimeStamp, map);
+				// PrintToServer("############# ---------- #############");
+				
+				// Save it locally
+				if (StrEqual(map, g_sCurrentMap, false))
+				{
+					PushArrayString(g_hRecordSteamId, clientSteamId);
+					PushArrayString(g_hRecordName, clientName);
+					PushArrayCell(g_hRecordMaxSpeed, topspeed);
+					PushArrayString(g_hRecordMaxSpeedTimeStamp, topspeedTimeStamp);
+					
+					// Save the current highest speedrecord
+					if (topspeed > g_fHighestSpeedrecord)
+					{
+						g_fHighestSpeedrecord = topspeed;
+					}
+				}
+				else
+				{
+					PushArrayString(g_hDifferentMapRecordSteamId, clientSteamId);
+					PushArrayString(g_hDifferentMapRecordName, clientName);
+					PushArrayCell(g_hDifferentMapRecordMaxSpeed, topspeed);
+					PushArrayString(g_hDifferentMapRecordMaxSpeedTimeStamp, topspeedTimeStamp);
+					PushArrayString(g_hDifferentMapRecordMapName, map);
+				}
+			}
+			
+			// Get the amount of records
+			new size = GetArraySize(g_hDifferentMapRecordMaxSpeed);
+			
+			// Create the menu
+			new Handle:menuHandle = CreateMenu(TopspeedAdminMenuDeleteRecordDifferentMapRecordSelectedCallBack);
+			SetMenuTitle(menuHandle, " - %t - \n%t\n%t %s\n", "Speed meter Commands", "Delete a saved speedrecord on a different map", "All speedrecords of", map);
+			
+			// Loop over all records
+			for (new i=0; i<size; i++)
+			{
+				
+				// Catch all data of that record
+				GetArrayString(g_hDifferentMapRecordName, i, clientName, sizeof(clientName));
+				GetArrayString(g_hDifferentMapRecordSteamId, i, clientSteamId, sizeof(clientSteamId));
+				topspeed = Float:GetArrayCell(g_hDifferentMapRecordMaxSpeed, i) * g_fUnitMess_Calc[g_iPlugin_Unit];
+				
+				// Add the record to the menu
+				Format(recordString, 50, "%s (%.1f %s)", clientName, topspeed, g_szUnitMess_Name[g_iPlugin_Unit]);
+				AddMenuItem(menuHandle, clientSteamId, recordString);
+			}
+			
+			// Display the created menu
+			SetMenuExitBackButton(menuHandle, true);
+			DisplayMenu(menuHandle, Client, MENU_TIME_FOREVER);
+		}
 	}
 }
 
