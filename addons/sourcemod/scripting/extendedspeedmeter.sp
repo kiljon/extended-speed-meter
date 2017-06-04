@@ -3345,30 +3345,72 @@ public AdminMenu_DeleteDifferentRecord(Handle:topmenu, TopMenuAction:action, Top
 stock DeleteDifferentRecord(Client)
 {
 	
+	// First get the different map list
+	
 	// Temporary declaration
-	decl String:map[MAX_MAPNAME_LENGTH];
+	decl String:sQuery[448];
 	
-	// Create the menu
-	new Handle:menuHandle = CreateMenu(TopspeedAdminMenuDeleteRecordDifferentMapCallBack);
-	SetMenuTitle(menuHandle, " - %t - \n%t\n", "Speed meter Commands", "Delete a saved speedrecord on a different map");
+	// Create the SQL get query to retreive all maps
+	FormatEx(sQuery, sizeof(sQuery), "SELECT DISTINCT map FROM topspeed WHERE map != '%s' ORDER BY map", g_sCurrentMap);
 	
-	// Options, first retreive all maps
-	GetDifferentMapList();
-	
-	// Get the amount of maps and loop over them
-	new mapListSize = GetArraySize(g_hDifferentMapList);
-	
-	for (new i=0; i<mapListSize; i++)
+	// Activate the query
+	SQL_TQuery(g_hSQL, DeleteDifferentRecordDifferentMapListCallback, sQuery, Client);
+}
+
+
+/**
+* Callback function for retreiving map list for the delete different record.
+*/
+public DeleteDifferentRecordDifferentMapListCallback(Handle:owner, Handle:hQueryDifferentMapList, const String:sError[], any:Client)
+{
+	if (hQueryDifferentMapList == INVALID_HANDLE)
 	{
-		
-		// Add the map to the options
-		GetArrayString(g_hDifferentMapList, i, map, sizeof(map));
-		AddMenuItem(menuHandle, map, map);
+		// Something went wrong, log the error
+		LogError("%s: SQL error on getting personal records maplist: %s", PLUGIN_NAME, sError);
+		return;
 	}
-	
-	// Display the created menu
-	SetMenuExitBackButton(menuHandle, true);
-	DisplayMenu(menuHandle, Client, MENU_TIME_FOREVER);
+	else
+	{
+		// Temporary declarations
+		decl String:mapName[MAX_MAPNAME_LENGTH];
+		decl String:map[MAX_MAPNAME_LENGTH];
+		
+		// Reset the maplist
+		ClearArray(g_hDifferentMapList);
+		
+		// Get the records if there are any
+		if (SQL_GetRowCount(hQueryDifferentMapList) > 0)
+		{
+			// Fetch Data per Row
+			while (SQL_FetchRow(hQueryDifferentMapList))
+			{
+				// Fetch the values
+				SQL_FetchString(hQueryDifferentMapList, 0, mapName, sizeof(mapName));
+				
+				// Save it locally
+				PushArrayString(g_hDifferentMapList, mapName);
+			}
+		}
+		
+		// Create the menu
+		new Handle:menuHandle = CreateMenu(TopspeedAdminMenuDeleteRecordDifferentMapCallBack);
+		SetMenuTitle(menuHandle, " - %t - \n%t\n", "Speed meter Commands", "Delete a saved speedrecord on a different map");
+		
+		// Get the amount of maps and loop over them
+		new mapListSize = GetArraySize(g_hDifferentMapList);
+		
+		for (new i=0; i<mapListSize; i++)
+		{
+			
+			// Add the map to the options
+			GetArrayString(g_hDifferentMapList, i, map, sizeof(map));
+			AddMenuItem(menuHandle, map, map);
+		}
+		
+		// Display the created menu
+		SetMenuExitBackButton(menuHandle, true);
+		DisplayMenu(menuHandle, Client, MENU_TIME_FOREVER);
+	}
 }
 
 /**
