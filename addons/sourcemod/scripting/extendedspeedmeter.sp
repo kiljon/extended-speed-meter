@@ -683,29 +683,11 @@ public ConVarChange_FloodTime(Handle:cvar, const String:oldVal[], const String:n
 public Action:Command_TopSpeedCurrent(client, args)
 {
 	
-	// Make sure the command isn't spammed by checking last command time
-	if (g_fLastCommand > GetGameTime())
+	// Do the command after flood verification
+	if (VerifyNoSpam(client))
 	{
-		// Print a warning to the client
-		PrintToChat(client, "[SM] %t!", "You are flooding the server, try again later");
-		
-		return Plugin_Handled;
+		ShowBestCurrentSession();
 	}
-	
-	// Check if sm_flood_time was set and set the last command time (in the future) to prevent flood
-	if (g_cvarFloodTime != INVALID_HANDLE)
-	{
-		// The value was set, add that to the current game time
-		g_fLastCommand = GetGameTime() + g_fPlugin_FloodTime;
-	}
-	else
-	{
-		// The value was set, add a default 0.75
-		g_fLastCommand = GetGameTime() + 0.75;
-	}
-	
-	// After the flood verification actually do the command
-	ShowBestCurrentSession();
 	
 	return Plugin_Handled;
 }
@@ -716,29 +698,11 @@ public Action:Command_TopSpeedCurrent(client, args)
 public Action:Command_TopSpeedAllTime(client, args)
 {
 	
-	// Make sure the command isn't spammed by checking last command time
-	if (g_fLastCommand > GetGameTime())
+	// Do the command after flood verification
+	if (VerifyNoSpam(client))
 	{
-		// Print a warning to the client
-		PrintToChat(client, "[SM] %t!", "You are flooding the server, try again later");
-		
-		return Plugin_Handled;
+		ShowBestAllTime(client);
 	}
-	
-	// Check if sm_flood_time was set and set the last command time (in the future) to prevent flood
-	if (g_cvarFloodTime != INVALID_HANDLE)
-	{
-		// The value was set, add that to the current game time
-		g_fLastCommand = GetGameTime() + g_fPlugin_FloodTime;
-	}
-	else
-	{
-		// The value was set, add a default 0.75
-		g_fLastCommand = GetGameTime() + 0.75;
-	}
-	
-	// After the flood verification actually do the command
-	ShowBestAllTime(client);
 	
 	return Plugin_Handled;
 }
@@ -749,29 +713,11 @@ public Action:Command_TopSpeedAllTime(client, args)
 public Action:Command_TopSpeedTop(client, args)
 {
 	
-	// Make sure the command isn't spammed by checking last command time
-	if (g_fLastCommand > GetGameTime())
+	// Do the command after flood verification
+	if (VerifyNoSpam(client))
 	{
-		// Print a warning to the client
-		PrintToChat(client, "[SM] %t!", "You are flooding the server, try again later");
-		
-		return Plugin_Handled;
+		ShowHighestOverall(client);
 	}
-	
-	// Check if sm_flood_time was set and set the last command time (in the future) to prevent flood
-	if (g_cvarFloodTime != INVALID_HANDLE)
-	{
-		// The value was set, add that to the current game time
-		g_fLastCommand = GetGameTime() + g_fPlugin_FloodTime;
-	}
-	else
-	{
-		// The value was set, add a default 0.75
-		g_fLastCommand = GetGameTime() + 0.75;
-	}
-	
-	// After the flood verification actually do the command
-	ShowHighestOverall(client);
 	
 	return Plugin_Handled;
 }
@@ -782,29 +728,11 @@ public Action:Command_TopSpeedTop(client, args)
 public Action:Command_TopSpeedPersonal(client, args)
 {
 	
-	// Make sure the command isn't spammed by checking last command time
-	if (g_fLastCommand > GetGameTime())
+	// Do the command after flood verification
+	if (VerifyNoSpam(client))
 	{
-		// Print a warning to the client
-		PrintToChat(client, "[SM] %t!", "You are flooding the server, try again later");
-		
-		return Plugin_Handled;
+		ShowPersonal(client);
 	}
-	
-	// Check if sm_flood_time was set and set the last command time (in the future) to prevent flood
-	if (g_cvarFloodTime != INVALID_HANDLE)
-	{
-		// The value was set, add that to the current game time
-		g_fLastCommand = GetGameTime() + g_fPlugin_FloodTime;
-	}
-	else
-	{
-		// The value was set, add a default 0.75
-		g_fLastCommand = GetGameTime() + 0.75;
-	}
-	
-	// After the flood verification actually do the command
-	ShowPersonal(client);
 	
 	return Plugin_Handled;
 }
@@ -815,13 +743,27 @@ public Action:Command_TopSpeedPersonal(client, args)
 public Action:Command_TopSpeedHelp(client, args)
 {
 	
+	// Do the command after flood verification
+	if (VerifyNoSpam(client))
+	{
+		ShowHelp(client);
+	}
+	
+	return Plugin_Handled;
+}
+
+/**
+* Prevent spam by keeping track of the last time a topspeed command was executed.
+*/
+stock VerifyNoSpam(clientCurrent)
+{
 	// Make sure the command isn't spammed by checking last command time
 	if (g_fLastCommand > GetGameTime())
 	{
 		// Print a warning to the client
-		PrintToChat(client, "[SM] %t!", "You are flooding the server, try again later");
+		PrintToChat(clientCurrent, "[SM] %t!", "You are flooding the server, try again later");
 		
-		return Plugin_Handled;
+		return false;
 	}
 	
 	// Check if sm_flood_time was set and set the last command time (in the future) to prevent flood
@@ -836,10 +778,7 @@ public Action:Command_TopSpeedHelp(client, args)
 		g_fLastCommand = GetGameTime() + 0.75;
 	}
 	
-	// After the flood verification actually do the command
-	ShowHelp(client);
-	
-	return Plugin_Handled;
+	return true;
 }
 
 /**
