@@ -1060,17 +1060,6 @@ public OnLibraryRemoved(const String:name[])
 		g_hTopMenu = INVALID_HANDLE;
 	}
 }
-
-public Handle_Commands(Handle:menu, TopMenuAction:action, TopMenuObject:object_id, param1, String:buffer[], maxlength)
-{
-	switch(action)
-	{
-		case TopMenuAction_DisplayOption:
-			Format(buffer, maxlength, "%T", "AdminMenu_Main", param1);
-		case TopMenuAction_DisplayTitle:
-			Format(buffer, maxlength, "%T", "AdminMenu_Select_Main", param1);
-	}
-}
  
 /**
 * The admin menu is ready, add the plugin admin menu to it.
